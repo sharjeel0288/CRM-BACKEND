@@ -179,6 +179,30 @@ const getAnnouncementById = async (req, res) => {
     }
 };
 
+const getAllQuotesByEmployeeId = async (req, res) => {
+    const { employeeId } = req.params;
+
+    try {
+        const quotes = await Admin.getAllQuotesWithItemsByEmployeeId(employeeId);
+        res.status(200).json({ success: true, quotes });
+    } catch (error) {
+        console.error('Get all quotes error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get quotes', error: error.message });
+    }
+};
+
+const getAllInvoicesAndItemsByEmployeeId = async (req, res) => {
+    const { employeeId } = req.params;
+
+    try {
+        const invoicesAndItems = await Admin.getAllInvoicesWithItemsByEmployeeId(employeeId);
+        res.status(200).json({ success: true, invoicesAndItems });
+    } catch (error) {
+        console.error('Get all invoices and items error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get invoices and items', error: error.message });
+    }
+};
+
 module.exports = {
     adminSignup,
     createEmployee,
@@ -189,4 +213,6 @@ module.exports = {
     deleteAnnouncement,
     getAllAnnouncements,
     getAnnouncementById,
+    getAllQuotesByEmployeeId,
+    getAllInvoicesAndItemsByEmployeeId,
 };

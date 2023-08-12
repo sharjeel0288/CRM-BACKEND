@@ -1,5 +1,8 @@
 // app\controllers\InvoiceController.js
 const Invoice = require('../model/Invoice');
+const Payment = require('../model/Payment')
+const { calculatePaymentStatus } = require('../utils/helpingFunctions');
+
 
 const createInvoice = async (req, res) => {
     try {
@@ -40,26 +43,33 @@ const getInvoiceById = async (req, res) => {
     const InvoiceId = req.params.id;
 
     try {
+        const InvoiceWithDetails = {};
+        
+        // Fetch Invoice Data
         const InvoiceData = await Invoice.getInvoiceById(InvoiceId);
         if (!InvoiceData) {
             return res.status(404).json({ success: false, message: 'Invoice not found' });
         }
 
+        // Fetch Invoice Items Data
         const InvoiceItemsData = await Invoice.getInvoiceItemsByInvoiceId(InvoiceId);
 
-        // Get payments for the invoice
-        const invoicePayments = await Payment.getPaymentsByInvoiceId(InvoiceId);
+        // Fetch Payments Data
+        const invoicePayments = await Payment.getAllPaymentsByInvoiceId(InvoiceId);
 
         const totalAmountPaid = invoicePayments.reduce((total, payment) => total + payment.amount, 0);
-        const status = calculateInvoiceStatus(InvoiceData.total_amount, totalAmountPaid);
+        const paymentStatus = calculatePaymentStatus(InvoiceData.total_amount, totalAmountPaid);
 
-        const InvoiceWithDetails = {
-            InvoiceData,
-            InvoiceItemsData,
-            payments: invoicePayments,
+        InvoiceWithDetails.InvoiceData = {
+            ...InvoiceData,
+            payment_status: paymentStatus,
             total_amount_paid: totalAmountPaid,
-            status
         };
+
+        InvoiceWithDetails.InvoiceItemsData = InvoiceItemsData;
+        InvoiceWithDetails.payments = invoicePayments;
+        InvoiceWithDetails.total_amount_paid = totalAmountPaid;
+        InvoiceWithDetails.status = paymentStatus;
 
         res.status(200).json({ success: true, Invoice: InvoiceWithDetails });
     } catch (error) {
@@ -67,6 +77,7 @@ const getInvoiceById = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to get Invoice', error: error.message });
     }
 };
+
 
 const editInvoiceData = async (req, res) => {
     const InvoiceId = req.params.id;

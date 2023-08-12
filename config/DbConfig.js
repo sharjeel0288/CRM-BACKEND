@@ -122,7 +122,8 @@ const pool = mysql.createPool({
         email VARCHAR(255),
         password VARCHAR(255)
       );
-      
+      -- Alter the table to set the AUTO_INCREMENT value
+      ALTER TABLE employee AUTO_INCREMENT = 1000000;
       CREATE TABLE IF NOT EXISTS setting (
         logo_img VARCHAR(255),
         stamp_img VARCHAR(255),

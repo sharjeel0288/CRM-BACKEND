@@ -22,4 +22,13 @@ router.get('/admin/all-announcements', authMiddleware.authenticateAdmin, adminCo
 router.get('/admin/announcement/:announcementId', authMiddleware.authenticateAdmin, adminController.getAnnouncementById); // New route to get announcement by ID
 
 
+// Get all quotes with quote items created by an employee with the "sales" department
+router.get('/admin/quotes-by-employee/:employeeId', authMiddleware.authenticateAdmin, adminController.getAllQuotesByEmployeeId);
+
+// Get all invoices and invoice items by employee ID
+router.get('/admin/invoices-and-items-by-employee/:employeeId', authMiddleware.authenticateAdmin, adminController.getAllInvoicesAndItemsByEmployeeId);
+
+
+module.exports = router;
+
 module.exports = router;

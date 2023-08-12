@@ -1,6 +1,6 @@
 // app\model\Invoice.js
 const connection = require('../../config/DbConfig');
-const Payment= require('../model/Payment')
+const Payment = require('../model/Payment')
 const { calculatePaymentStatus } = require('../utils/helpingFunctions');
 
 class Invoice {
@@ -80,38 +80,38 @@ class Invoice {
                 JOIN employee e ON q.added_by_employee = e.id
             `;
             const [invoices, fields] = await connection.query(selectQuery);
-    
+
             const invoicesWithPaymentStatus = [];
-    
+
             for (const invoice of invoices) {
                 const invoiceId = invoice.id;
                 const invoicePayments = await Payment.getAllPaymentsByInvoiceId(invoiceId);
                 const invoiceItems = await Invoice.getInvoiceItemsByInvoiceId(invoiceId);
-    
+
                 const totalAmountPaid = invoicePayments.reduce((total, payment) => total + payment.amount, 0);
-    
+
                 // Calculate total amount from InvoiceItemsData
-                const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.item_subtotal), 0);
-    
+                const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.item_total), 0);
                 const paymentStatus = calculatePaymentStatus(totalAmount, totalAmountPaid);
-    
+                console.log('totalAmount',totalAmount)
+
                 const invoiceWithPaymentStatus = {
                     ...invoice,
                     payment_status: paymentStatus,
                     total_amount_paid: totalAmountPaid,
                     total_amount: totalAmount,
                 };
-    
+
                 invoicesWithPaymentStatus.push(invoiceWithPaymentStatus);
             }
-    
+
             return invoicesWithPaymentStatus;
         } catch (error) {
             console.error('Get all invoices error:', error);
             throw error;
         }
     }
-    
+
     static async getInvoiceById(invoiceId) {
         try {
             const selectQuery = `
@@ -122,8 +122,13 @@ class Invoice {
                 WHERE q.id = ?;
             `;
             const [invoices, fields] = await connection.query(selectQuery, [invoiceId]);
+            
+            if (invoices.length === 0) {
+                throw new Error('Invoice not found'); // Throw an error if invoice doesn't exist
+            }
+            
             const invoice = invoices[0];
-    
+            
             // Get payments for the invoice
             const invoicePayments = await Payment.getAllPaymentsByInvoiceId(invoiceId);
             const invoiceItems = await Invoice.getInvoiceItemsByInvoiceId(invoiceId);
@@ -131,7 +136,7 @@ class Invoice {
             const totalAmountPaid = invoicePayments.reduce((total, payment) => total + payment.amount, 0);
     
             // Calculate total amount from InvoiceItemsData
-            const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.item_subtotal), 0);
+            const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.iteto), 0);
     
             const paymentStatus = calculatePaymentStatus(totalAmount, totalAmountPaid);
     
@@ -149,17 +154,19 @@ class Invoice {
         }
     }
     
-    
+
+
 
     static async getInvoiceItemsByInvoiceId(invoiceId) {
         try {
             const selectQuery = 'SELECT * FROM invoice_item WHERE invoice_id = ?';
-            const [invoiceItems, fields] = await connection.query(selectQuery, [invoiceId]);
-            return invoiceItems;
+            const [rows] = await connection.query(selectQuery, [invoiceId]);
+            return rows;
         } catch (error) {
             console.error('Get invoice items by invoice ID error:', error);
             throw error;
         }
+    
     }
 
     static async deleteInvoiceItems(invoiceId) {
