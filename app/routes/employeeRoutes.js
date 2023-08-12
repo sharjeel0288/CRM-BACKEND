@@ -11,4 +11,8 @@ router.get('/employee/announcements', authMiddleware.authenticateEmployee, emplo
 // Change announcement status
 router.patch('/employee/announcement/:id/status',authMiddleware.authenticateEmployee, employeeController.changeAnnouncementStatus);
 
+
+// Get quotes or invoices based on the department of the employee
+router.get('/employee/documents', authMiddleware.authenticateEmployee, employeeController.getDocumentsByDepartment);
+
 module.exports = router;

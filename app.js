@@ -12,10 +12,16 @@ const employeeRoutes = require('./app/routes/employeeRoutes');
 const settingRoutes = require('./app/routes/SettingRoutes');
 const bodyParser = require('body-parser');
 
+
 const app = express();
 const port = 3000;
 
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:3001', // Change this to the correct origin of your frontend
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
 // Routes
@@ -29,6 +35,8 @@ app.use('/api', employeeRoutes);
 app.use('/api',settingRoutes)
 // Error handler
 app.use(errorHandler);
+
+
 
 // Start the server
 app.listen(port, () => {

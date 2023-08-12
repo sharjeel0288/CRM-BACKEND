@@ -47,9 +47,31 @@ const changeAnnouncementStatus = async (req, res) => {
 };
 
 
+// Get quotes or invoices based on the department of the employee
+const getDocumentsByDepartment = async (req, res) => {
+    try {
+        const { id, department } = req.user; // Extract employee's id and department from req.user
+
+        let documents = [];
+
+        if (department === 'sales') {
+            documents = await Employee.getQuotesByEmployeeId(id);
+        } else if (department === 'accounts') {
+            documents = await Employee.getInvoicesByEmployeeId(id);
+        } else {
+            return res.status(400).json({ success: false, message: 'Invalid department' });
+        }
+
+        res.status(200).json({ success: true, documents });
+    } catch (error) {
+        console.error('Get documents by department error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get documents', error: error.message });
+    }
+};
 
 module.exports = {
     // ... Other functions ...
     getAnnouncementsByEmployeeEmail,
     changeAnnouncementStatus,
+    getDocumentsByDepartment,
 };
