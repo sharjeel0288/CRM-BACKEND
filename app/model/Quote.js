@@ -33,7 +33,8 @@ class Quote {
                 terms_and_condition: quoteData.terms_and_condition,
                 payment_terms: quoteData.payment_terms,
                 execution_time: quoteData.execution_time,
-                bank_details: quoteData.bank_details
+                bank_details: quoteData.bank_details,
+                payment_mode_id: paymentModeId, 
             };
             const [quoteInsertResult, ___] = await connection.query(insertQuoteQuery, quoteDataToInsert);
             const quoteId = quoteInsertResult.insertId;
@@ -142,7 +143,8 @@ class Quote {
                 payment_terms: updatedQuoteData.payment_terms || existingQuoteData.payment_terms,
                 execution_time: updatedQuoteData.execution_time || existingQuoteData.execution_time,
                 bank_details: updatedQuoteData.bank_details || existingQuoteData.bank_details,
-                added_by_employee: existingQuoteData.added_by_employee
+                added_by_employee: existingQuoteData.added_by_employee,
+                payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
             
             // If client email is provided, update the client_id

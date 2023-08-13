@@ -2,6 +2,7 @@
 const connection = require('../../config/DbConfig');
 const Payment = require('../model/Payment')
 const { calculatePaymentStatus } = require('../utils/helpingFunctions');
+const { updateQuoteData } = require('./Quote');
 
 class Invoice {
     static async createInvoice(invoiceData, invoiceItemsData) {
@@ -42,6 +43,8 @@ class Invoice {
                 execution_time: invoiceData.execution_time,
                 bank_details: invoiceData.bank_details,
                 isPerforma: invoiceData.isPerforma,
+                payment_mode_id: paymentModeId,
+
             };
             const [invoiceInsertResult, ___] = await connection.query(insertInvoiceQuery, invoiceDataToInsert);
             const invoiceId = invoiceInsertResult.insertId;
@@ -208,6 +211,7 @@ class Invoice {
                 bank_details: updatedInvoiceData.bank_details || existingInvoiceData.bank_details,
                 added_by_employee: existingInvoiceData.added_by_employee,
                 isPerforma: updatedInvoiceData.isPerforma || existingInvoiceData.isPerforma,
+                payment_mode_id: updateQuoteData.paymentModeId|| existingQuoteData.payment_mode_id
             };
 
             // If client email is provided, update the client_id

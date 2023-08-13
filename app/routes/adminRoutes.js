@@ -31,4 +31,3 @@ router.get('/admin/invoices-and-items-by-employee/:employeeId', authMiddleware.a
 
 module.exports = router;
 
-module.exports = router;

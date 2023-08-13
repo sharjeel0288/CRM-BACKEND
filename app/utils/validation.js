@@ -166,6 +166,10 @@ const quoteValidationSchema = Joi.object({
       // Add more validation rules for quote items fields
     })
   ),
+  payment_mode_id: Joi.number().integer().required().messages({
+    'number.base': 'Invalid payment mode ID value',
+    'any.required': 'Payment mode ID is required',
+  }),
 });
 
 const validateQuote = (req, res, next) => {
@@ -206,26 +210,28 @@ const validatePaymentMode = (req, res, next) => {
 
 const invoiceSchema = Joi.object({
   invoiceData: Joi.object({
-      client_email: Joi.string().email().required(),
-      status: Joi.number().integer().min(1).max(7).required(),
-      employee_email: Joi.string().email().required(),
-      expiry_date: Joi.date().iso().required(),
-      terms_and_condition: Joi.string().required(),
-      payment_terms: Joi.string().required(),
-      execution_time: Joi.string().required(),
-      bank_details: Joi.string().required(),
-      isPerforma: Joi.number().integer().min(0).max(1).required(), // Add this line
+    client_email: Joi.string().email().required(),
+    status: Joi.number().integer().min(1).max(7).required(),
+    employee_email: Joi.string().email().required(),
+    expiry_date: Joi.date().iso().required(),
+    terms_and_condition: Joi.string().required(),
+    payment_terms: Joi.string().required(),
+    execution_time: Joi.string().required(),
+    bank_details: Joi.string().required(),
+    isPerforma: Joi.number().integer().min(0).max(1).required(), // Add this line
+    payment_mode_id: Joi.number().integer().required(), // Add this line for payment_mode_id validation
+
   }).required(),
   invoiceItemsData: Joi.array().items(Joi.object({
-      item_name: Joi.string().required(),
-      item_description: Joi.string().required(),
-      item_quantity: Joi.number().integer().min(1).required(),
-      item_xdim: Joi.number().required(),
-      item_ydim: Joi.number().required(),
-      item_price: Joi.number().required(),
-      item_subtotal: Joi.number().required(),
-      item_tax: Joi.number().required(),
-      item_total: Joi.number().required(),
+    item_name: Joi.string().required(),
+    item_description: Joi.string().required(),
+    item_quantity: Joi.number().integer().min(1).required(),
+    item_xdim: Joi.number().required(),
+    item_ydim: Joi.number().required(),
+    item_price: Joi.number().required(),
+    item_subtotal: Joi.number().required(),
+    item_tax: Joi.number().required(),
+    item_total: Joi.number().required(),
   })).min(1).required(),
 });
 
@@ -233,7 +239,7 @@ const invoiceSchema = Joi.object({
 const validateInvoice = (req, res, next) => {
   const { error } = invoiceSchema.validate(req.body);
   if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+    return res.status(400).json({ error: error.details[0].message });
   }
   next();
 };
@@ -253,7 +259,7 @@ const invoiceItemSchema = Joi.object({
 const validateInvoiceItem = (req, res, next) => {
   const { error } = invoiceItemSchema.validate(req.body);
   if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+    return res.status(400).json({ error: error.details[0].message });
   }
   next();
 };
@@ -270,7 +276,7 @@ const paymentSchema = Joi.object({
 const validatePayment = (req, res, next) => {
   const { error } = paymentSchema.validate(req.body);
   if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+    return res.status(400).json({ error: error.details[0].message });
   }
   next();
 };

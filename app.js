@@ -1,3 +1,5 @@
+// app.js
+
 const express = require('express');
 const cors = require('cors');
 const clientRoutes = require('./app/routes/clientRoutes');
@@ -11,6 +13,7 @@ const invoiceRoutes = require('./app/routes/invoiceRoutes');
 const employeeRoutes = require('./app/routes/employeeRoutes');
 const settingRoutes = require('./app/routes/SettingRoutes');
 const bodyParser = require('body-parser');
+const reportRoutes = require('./app/routes/reportRoutes');
 
 
 const app = express();
@@ -24,7 +27,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
+
 // Routes
+app.use('/api', reportRoutes);
 app.use('/api', clientRoutes);
 app.use('/api', adminRoutes);
 app.use('/auth', authRoutes);
@@ -32,7 +37,8 @@ app.use('/api', quoteRoutes);
 app.use('/api', invoiceRoutes);
 app.use('/api', paymentModeRoute);
 app.use('/api', employeeRoutes);
-app.use('/api',settingRoutes)
+app.use('/api', settingRoutes)
+
 // Error handler
 app.use(errorHandler);
 
