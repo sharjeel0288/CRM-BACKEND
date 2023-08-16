@@ -5,9 +5,11 @@ const invoiceController = require('../controllers/invoiceController'); // Correc
 const validation = require('../utils/validation');
 const authMiddleware = require('../middleware/authMiddleware');
 const invoiceItemRoutes = require('./invoiceItemRoutes');
+const PDFController = require('../controllers/PDFController');
 const paymentRoutes = require('./paymentRoutes');
 const router = express.Router();
 
+router.get('/invoice/:id/pdf', authMiddleware.authAdminAccounts, PDFController.GetInvoicePdfDetails);
 router.post('/invoice/create', authMiddleware.authAdminAccounts, validation.validateInvoice, invoiceController.createInvoice); // Corrected route and validation
 router.get('/invoice/all', invoiceController.getAllInvoices); // Corrected route
 router.get('/invoice/:id', authMiddleware.authAdminAccounts, invoiceController.getInvoiceById); // Corrected route

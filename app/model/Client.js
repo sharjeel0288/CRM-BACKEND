@@ -10,6 +10,7 @@ class Client {
       throw error;
     }
   }
+  
 
   static async getClientById(id) {
     try {

@@ -166,7 +166,16 @@ class Quote {
         }
     }
     
-    
+    static async updateQuotePDFFileName(quoteId, fileName) {
+        try {
+            const updateFileNameQuery = 'UPDATE quote SET pdf_file_name = ? WHERE id = ?';
+            await connection.query(updateFileNameQuery, [fileName, quoteId]);
+            return { success: true, message: 'Quote PDF file name updated successfully' };
+        } catch (error) {
+            console.error('Update quote PDF file name error:', error);
+            throw { success: false, message: 'Failed to update quote PDF file name', error: error.message };
+        }
+    }
     
     
 }
@@ -177,5 +186,6 @@ function generateUniqueQuoteNumber() {
     const uniqueNumber = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     return uniqueNumber;
 }
+
 
 module.exports = Quote;

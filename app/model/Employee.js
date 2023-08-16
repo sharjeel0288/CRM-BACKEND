@@ -50,14 +50,14 @@ class Employee {
                 JOIN quote_item qi ON q.id = qi.quote_id
                 WHERE q.added_by_employee = ?;
             `;
-    
+
             const [quotesAndItems, fields] = await connection.query(selectQuery, [employeeId]);
-    
+
             const formattedData = [];
-    
+
             for (const row of quotesAndItems) {
                 const existingQuote = formattedData.find(item => item.quote_id === row.quote_id);
-    
+
                 if (existingQuote) {
                     existingQuote.items.push({
                         item_id: row.item_id,
@@ -69,7 +69,7 @@ class Employee {
                         item_tax: row.item_tax,
                         item_total: row.item_total,
                     });
-    
+
                     // Update the total amount of the quote
                     existingQuote.total_amount += row.item_total;
                 } else {
@@ -100,14 +100,14 @@ class Employee {
                     });
                 }
             }
-    
+
             return formattedData;
         } catch (error) {
             console.error('Get all quotes by employee ID error:', error);
             throw new Error('Failed to fetch quotes for the provided employee ID.');
         }
-    } 
-    
+    }
+
     static async getInvoicesByEmployeeId(employeeId) {
         try {
             const selectQuery = `
@@ -120,12 +120,12 @@ class Employee {
                 WHERE i.added_by_employee = ?;
             `;
             const [invoicesAndItems, fields] = await connection.query(selectQuery, [employeeId]);
-    
+
             const formattedData = [];
-    
+
             for (const row of invoicesAndItems) {
                 const existingInvoice = formattedData.find(item => item.invoice_id === row.invoice_id);
-    
+
                 if (existingInvoice) {
                     existingInvoice.items.push({
                         item_id: row.item_id,
@@ -139,7 +139,7 @@ class Employee {
                         item_tax: row.item_tax,
                         item_total: row.item_total,
                     });
-    
+
                     // Update the total amount of the invoice
                     existingInvoice.total_amount += row.item_total;
                 } else {
@@ -173,11 +173,26 @@ class Employee {
                     });
                 }
             }
-    
+
             return formattedData;
         } catch (error) {
             console.error('Get all invoices and items by employee ID error:', error);
             throw new Error('Failed to fetch invoices and items for the provided employee ID.');
+        }
+    }
+    static async getEmployeeById(employeeId) {
+        try {
+            const query = 'SELECT * FROM employee WHERE id = ?';
+            const [employees, _] = await connection.query(query, [employeeId]);
+
+            if (employees.length === 0) {
+                throw new Error(`Employee with ID ${employeeId} not found`);
+            }
+
+            return employees[0];
+        } catch (error) {
+            console.error('Error fetching employee:', error.message);
+            throw error;
         }
     }
 

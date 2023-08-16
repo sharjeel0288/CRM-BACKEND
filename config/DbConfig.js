@@ -34,6 +34,13 @@ const pool = mysql.createPool({
         password VARCHAR(255),    
         email VARCHAR(255)
       );
+      CREATE TABLE IF NOT EXISTS payment_mode (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(255),
+        description TEXT,
+        is_enabled BOOLEAN,
+        is_default BOOLEAN
+      );
       
 
       CREATE TABLE IF NOT EXISTS client (
@@ -138,14 +145,7 @@ const pool = mysql.createPool({
         vat_no VARCHAR(50)
       );
       
-      CREATE TABLE IF NOT EXISTS payment_mode (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(255),
-        description TEXT,
-        is_enabled BOOLEAN,
-        is_default BOOLEAN
-      );
-      
+    
       CREATE TABLE IF NOT EXISTS payment (
         id INT PRIMARY KEY AUTO_INCREMENT,
         invoice_id INT,
