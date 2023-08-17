@@ -68,8 +68,10 @@ const pool = mysql.createPool({
         execution_time VARCHAR(255),
         bank_details TEXT,
         added_by_employee INT, -- Employee ID who added the invoice
-        FOREIGN KEY (client_id) REFERENCES client(id),
+        FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE,
         FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) -- Foreign key reference to payment_mode
+        
+    
     );
       
 
@@ -85,7 +87,7 @@ const pool = mysql.createPool({
         item_subtotal FLOAT,
         item_tax FLOAT,
         item_total FLOAT,
-        FOREIGN KEY (invoice_id) REFERENCES invoice(id)
+        FOREIGN KEY (invoice_id) REFERENCES invoice(id) ON DELETE CASCADE
       );
       
       CREATE TABLE IF NOT EXISTS quote (
@@ -101,7 +103,7 @@ const pool = mysql.createPool({
         payment_terms TEXT,
         execution_time VARCHAR(255),
         bank_details TEXT,
-        FOREIGN KEY (client_id) REFERENCES client(id),
+        FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE,
         FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) -- Foreign key reference to payment_mode
     );
       
@@ -119,7 +121,7 @@ const pool = mysql.createPool({
         item_subtotal FLOAT,
         item_tax FLOAT,
         item_total FLOAT,
-        FOREIGN KEY (quote_id) REFERENCES quote(id)
+        FOREIGN KEY (quote_id) REFERENCES quote(id) ON DELETE CASCADE
       );
       
       CREATE TABLE IF NOT EXISTS employee (
@@ -154,7 +156,7 @@ const pool = mysql.createPool({
         payment_mode_id INT,
         reference VARCHAR(255),
         description TEXT,
-        FOREIGN KEY (invoice_id) REFERENCES invoice(id),
+        FOREIGN KEY (invoice_id) REFERENCES invoice(id) ON DELETE CASCADE,
         FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id)
       );
       

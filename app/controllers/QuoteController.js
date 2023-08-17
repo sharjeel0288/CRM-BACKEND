@@ -16,22 +16,22 @@ const createQuote = async (req, res) => {
 const getAllQuotes = async (req, res) => {
     try {
         const quotes = await Quote.getAllQuotes();
-        const quotesWithDetails = [];
+        const QuotesWithDetails = [];
 
         for (const quote of quotes) {
-            const quoteData = await Quote.getQuoteById(quote.id);
-            const quoteItemsData = await Quote.getQuoteItemsByQuoteId(quote.id);
+            const quotesData = await Quote.getQuoteById(quote.id);
+            const quotesItemsData = await Quote.getQuoteItemsByQuoteId(quote.id);
 
-            quotesWithDetails.push({
-                quoteData,
-                quoteItemsData
+            QuotesWithDetails.push({
+                quotesData,
+                quotesItemsData
             });
         }
 
-        res.status(200).json({ success: true, quotes: quotesWithDetails });
+        res.status(200).json({ success: true, Quote: QuotesWithDetails });
     } catch (error) {
-        console.error('Get all quotes error:', error);
-        res.status(500).json({ success: false, message: 'Failed to get quotes', error: error.message });
+        console.error('Get all Quote error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get Quote', error: error.message });
     }
 };
 

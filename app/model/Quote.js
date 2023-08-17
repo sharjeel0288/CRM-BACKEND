@@ -34,7 +34,7 @@ class Quote {
                 payment_terms: quoteData.payment_terms,
                 execution_time: quoteData.execution_time,
                 bank_details: quoteData.bank_details,
-                payment_mode_id: paymentModeId, 
+                payment_mode_id: paymentModeId,
             };
             const [quoteInsertResult, ___] = await connection.query(insertQuoteQuery, quoteDataToInsert);
             const quoteId = quoteInsertResult.insertId;
@@ -72,29 +72,73 @@ class Quote {
                 JOIN employee e ON q.added_by_employee = e.id
             `;
             const [quotes, fields] = await connection.query(selectQuery);
-            return quotes;
+
+            const QouteDetailsWithStatus = [];
+
+            for (const quote of quotes) {
+                const quoteId = quote.id;
+                const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
+
+                const totalAmount = quoteItems.reduce((total, item) => total + parseFloat(item.item_total), 0);
+
+                const QouteDetails = {
+                    ...quote,
+                };
+
+                QouteDetailsWithStatus.push(QouteDetails);
+            }
+
+            return QouteDetailsWithStatus;
         } catch (error) {
-            console.error('Get all quotes error:', error);
+            console.error('Get all invoices error:', error);
             throw error;
         }
     }
 
     static async getQuoteById(quoteId) {
+        const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
         try {
             const selectQuery = `
-                SELECT q.*, c.email AS client_email, e.email AS employee_email
+                SELECT q.*, c.email AS client_email, e.email AS employee_email,
+                c.fname AS client_fname, c.lname AS client_lname,
+                e.name AS employee_name, e.surname AS employee_surname
                 FROM quote q
                 JOIN client c ON q.client_id = c.id
                 JOIN employee e ON q.added_by_employee = e.id
                 WHERE q.id = ?;
             `;
             const [quotes, fields] = await connection.query(selectQuery, [quoteId]);
-            return quotes[0];
+
+            if (quotes.length === 0) {
+                throw new Error('Invoice not found'); // Throw an error if invoice doesn't exist
+            }
+
+            const invoice = quotes[0];
+
+            // Get payments for the invoice
+            const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
+
+            invoice.status = statusList[invoice.status - 1];
+
+            // Calculate total amount from InvoiceItemsData
+            const totalAmount = quoteItems.reduce((total, item) => total + parseFloat(item.item_total || 0), 0);
+            const SubTotal = quoteItems.reduce((total, item) => total + parseFloat(item.item_total || 0), 0);
+            const tax = 0.5;
+
+            const QouteDetails = {
+                ...invoice, // Use invoice object instead of quotes object
+                total_amount: totalAmount,
+                SubTotal: SubTotal,
+                tax: tax
+            };
+
+            return QouteDetails;
         } catch (error) {
-            console.error('Get quote by ID error:', error);
+            console.error('Get invoice by ID error:', error);
             throw error;
         }
     }
+
 
     static async getQuoteItemsByQuoteId(quoteId) {
         try {
@@ -132,7 +176,7 @@ class Quote {
             const selectExistingQuoteQuery = 'SELECT * FROM quote WHERE id = ?';
             const [existingQuoteRows, _] = await connection.query(selectExistingQuoteQuery, [quoteId]);
             const existingQuoteData = existingQuoteRows[0];
-    
+
             // If provided, update the values; otherwise, keep the existing values
             const newQuoteData = {
                 status: (updatedQuoteData.status && updatedQuoteData.status >= 1 && updatedQuoteData.status <= 7)
@@ -146,7 +190,7 @@ class Quote {
                 added_by_employee: existingQuoteData.added_by_employee,
                 payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
-            
+
             // If client email is provided, update the client_id
             if (updatedQuoteData.client_email) {
                 const [clientResult, __] = await connection.query('SELECT id FROM client WHERE email = ?', [updatedQuoteData.client_email]);
@@ -155,17 +199,17 @@ class Quote {
                     newQuoteData.client_id = clientId;
                 }
             }
-    
+
             const updateQuoteQuery = 'UPDATE quote SET ? WHERE id = ?';
             await connection.query(updateQuoteQuery, [newQuoteData, quoteId]);
-    
+
             return { success: true, message: 'Quote data updated successfully' };
         } catch (error) {
             console.error('Update quote data error:', error);
             throw { success: false, message: 'Failed to update quote data', error: error.message };
         }
     }
-    
+
     static async updateQuotePDFFileName(quoteId, fileName) {
         try {
             const updateFileNameQuery = 'UPDATE quote SET pdf_file_name = ? WHERE id = ?';
@@ -176,8 +220,8 @@ class Quote {
             throw { success: false, message: 'Failed to update quote PDF file name', error: error.message };
         }
     }
-    
-    
+
+
 }
 
 function generateUniqueQuoteNumber() {

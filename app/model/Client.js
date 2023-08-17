@@ -1,15 +1,31 @@
 const connection = require('../../config/DbConfig');
-
+const Employee = require('./Employee');
+// const Employee = require('./Employee');
 class Client {
   static async getAllClients() {
     try {
-      const query = 'SELECT * FROM client';
-      const [clients, fields] = await connection.query(query);
-      return clients;
+        const query = 'SELECT * FROM client';
+        const [clients, fields] = await connection.query(query);
+
+        // Iterate through each client to fetch the employee who added the client
+        for (const client of clients) {
+            const getEmployeeQuery = 'SELECT name, surname  FROM employee WHERE id = ?';
+            const [employeeResults, employeeFields] = await connection.query(getEmployeeQuery, [client.added_by_employee]);
+
+            if (employeeResults.length === 0) {
+                client.added_by_employee = 'Admin';
+            } else {
+                const employee = employeeResults[0];
+                client.added_by_employee = `${employee.name} ${employee.surname}`;
+            }
+        }
+
+        return clients;
     } catch (error) {
-      throw error;
+        throw error;
     }
-  }
+}
+
   
 
   static async getClientById(id) {
@@ -46,6 +62,7 @@ class Client {
   }
 
   static async updateClient(id, clientData) {
+    console.log(clientData)
     try {
       if (!clientData || Object.keys(clientData).length === 0) {
         throw new Error('Please provide data to modify the client.');
@@ -80,10 +97,14 @@ class Client {
 
   static async deleteClient(id) {
     try {
+      console.log(id)
+      console.log('************************************************************')
       const query = 'DELETE FROM client WHERE id = ?';
       const [result, fields] = await connection.query(query, [id]);
+      console.log(result)
       return result.affectedRows;
     } catch (error) {
+      console.log(error)
       throw error;
     }
   }

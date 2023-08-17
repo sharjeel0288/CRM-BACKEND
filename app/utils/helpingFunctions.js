@@ -3,11 +3,11 @@ const { body } = require('express-validator');
 
 function calculatePaymentStatus(totalAmount, totalAmountPaid) {
     if (totalAmountPaid === 0) {
-        return 'Unpaid';
+        return 'UNPAID';
     } else if (totalAmountPaid < totalAmount) {
-        return 'Partially Paid';
+        return 'PARTIALLY PAID';
     } else {
-        return 'Paid';
+        return 'PAID';
     }
 }
 

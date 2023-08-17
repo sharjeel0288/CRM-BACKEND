@@ -10,15 +10,15 @@ const clientSchema = Joi.object({
   lname: Joi.string().required(),
   phone: Joi.string().required(),
   email: Joi.string().email().required(),
-  date: Joi.date(),
+  date: Joi.date().allow(null),  // Allow null values for date
+  added_by_employee: Joi.string().allow('Admin').required(),  // Assume 'Admin' is a valid value
   company_name: Joi.string(),
 });
 
-// Middleware to validate client data
 const validateClient = (req, res, next) => {
   const { error } = clientSchema.validate(req.body);
   if (error) {
-    return res.status(400).json({ error: error.details[0].message });
+      return res.status(400).json({ error: error.details[0].message });
   }
   next();
 };

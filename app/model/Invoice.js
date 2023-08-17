@@ -3,6 +3,8 @@ const connection = require('../../config/DbConfig');
 const Payment = require('../model/Payment')
 const { calculatePaymentStatus } = require('../utils/helpingFunctions');
 const { updateQuoteData } = require('./Quote');
+const Employee = require('./Employee')
+const Client = require('./Client')
 
 class Invoice {
     static async createInvoice(invoiceData, invoiceItemsData) {
@@ -96,7 +98,7 @@ class Invoice {
                 // Calculate total amount from InvoiceItemsData
                 const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.item_total), 0);
                 const paymentStatus = calculatePaymentStatus(totalAmount, totalAmountPaid);
-                console.log('totalAmount',totalAmount)
+                console.log('totalAmount', totalAmount)
 
                 const invoiceWithPaymentStatus = {
                     ...invoice,
@@ -116,47 +118,58 @@ class Invoice {
     }
 
     static async getInvoiceById(invoiceId) {
+        const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
         try {
             const selectQuery = `
-                SELECT q.*, c.email AS client_email, e.email AS employee_email
+                SELECT q.*, c.email AS client_email, e.email AS employee_email,
+                c.fname AS client_fname, c.lname AS client_lname,
+                e.name AS employee_name, e.surname AS employee_surname
                 FROM invoice q
                 JOIN client c ON q.client_id = c.id
                 JOIN employee e ON q.added_by_employee = e.id
                 WHERE q.id = ?;
             `;
             const [invoices, fields] = await connection.query(selectQuery, [invoiceId]);
-            
+
             if (invoices.length === 0) {
                 throw new Error('Invoice not found'); // Throw an error if invoice doesn't exist
             }
-            
+           
             const invoice = invoices[0];
-            
+
             // Get payments for the invoice
             const invoicePayments = await Payment.getAllPaymentsByInvoiceId(invoiceId);
             const invoiceItems = await Invoice.getInvoiceItemsByInvoiceId(invoiceId);
-    
+
             const totalAmountPaid = invoicePayments.reduce((total, payment) => total + payment.amount, 0);
-    
+            if (invoice.isPerforma==1){
+                invoice.isPerforma='Performa Invoice'
+            }
+            else{
+                invoice.isPerforma='Tax Invoice'
+            }
+            invoice.status=statusList[invoice.status-1]
             // Calculate total amount from InvoiceItemsData
-            const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.iteto), 0);
-    
+            const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.item_total || 0), 0);
+
             const paymentStatus = calculatePaymentStatus(totalAmount, totalAmountPaid);
-    
+
             const invoiceWithPaymentStatus = {
                 ...invoice,
                 payment_status: paymentStatus,
                 total_amount_paid: totalAmountPaid,
                 total_amount: totalAmount,
+
             };
-    
+
             return invoiceWithPaymentStatus;
         } catch (error) {
             console.error('Get invoice by ID error:', error);
             throw error;
         }
     }
-    
+
+
 
 
 
@@ -169,7 +182,7 @@ class Invoice {
             console.error('Get invoice items by invoice ID error:', error);
             throw error;
         }
-    
+
     }
 
     static async deleteInvoiceItems(invoiceId) {
@@ -211,7 +224,7 @@ class Invoice {
                 bank_details: updatedInvoiceData.bank_details || existingInvoiceData.bank_details,
                 added_by_employee: existingInvoiceData.added_by_employee,
                 isPerforma: updatedInvoiceData.isPerforma || existingInvoiceData.isPerforma,
-                payment_mode_id: updateQuoteData.paymentModeId|| existingQuoteData.payment_mode_id
+                payment_mode_id: updateQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
 
             // If client email is provided, update the client_id
