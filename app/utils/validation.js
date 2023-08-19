@@ -8,12 +8,13 @@ const Joi = require('joi');
 const clientSchema = Joi.object({
   fname: Joi.string().required(),
   lname: Joi.string().required(),
-  phone: Joi.string().required(),
+  phone: Joi.string().pattern(/^[0-9]+(?:[-\s][0-9]+)*$/).required(),
   email: Joi.string().email().required(),
-  date: Joi.date().allow(null),  // Allow null values for date
-  added_by_employee: Joi.string().allow('Admin').required(),  // Assume 'Admin' is a valid value
+  date: Joi.date().allow(null),
+  added_by_employee: Joi.string().allow('Admin').required(),
   company_name: Joi.string(),
 });
+
 
 const validateClient = (req, res, next) => {
   const { error } = clientSchema.validate(req.body);
