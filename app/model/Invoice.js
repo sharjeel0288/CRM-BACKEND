@@ -123,7 +123,7 @@ class Invoice {
             const selectQuery = `
                 SELECT q.*, c.email AS client_email, e.email AS employee_email,
                 c.fname AS client_fname, c.lname AS client_lname,
-                e.name AS employee_name, e.surname AS employee_surname
+                e.name AS employee_name, e.surname AS employee_surname, c.phone as client_phone
                 FROM invoice q
                 JOIN client c ON q.client_id = c.id
                 JOIN employee e ON q.added_by_employee = e.id
@@ -143,10 +143,10 @@ class Invoice {
 
             const totalAmountPaid = invoicePayments.reduce((total, payment) => total + payment.amount, 0);
             if (invoice.isPerforma == 1) {
-                invoice.isPerforma = 'Performa Invoice'
+                invoice.isPerforma = 'PERFORMA INVOICE'
             }
             else {
-                invoice.isPerforma = 'Tax Invoice'
+                invoice.isPerforma = 'TAX INVOICE'
             }
             invoice.status = statusList[invoice.status - 1]
             // Calculate total amount from InvoiceItemsData
