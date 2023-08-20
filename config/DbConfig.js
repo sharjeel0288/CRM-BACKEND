@@ -64,6 +64,7 @@ const pool = mysql.createPool({
         status INT,
         expiry_date DATE,
         terms_and_condition TEXT,
+        note TEXT,
         payment_terms TEXT,
         execution_time VARCHAR(255),
         bank_details TEXT,
@@ -100,6 +101,7 @@ const pool = mysql.createPool({
         added_by_employee INT, -- Employee ID who added the quote
         expiry_date DATE,
         terms_and_condition TEXT,
+        note TEXT,
         payment_terms TEXT,
         execution_time VARCHAR(255),
         bank_details TEXT,

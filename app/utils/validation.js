@@ -151,6 +151,9 @@ const quoteValidationSchema = Joi.object({
   terms_and_condition: Joi.string().required().messages({
     'any.required': 'Terms and conditions are required',
   }),
+  note: Joi.string().required().messages({
+    'any.required': 'note are required',
+  }),
   payment_terms: Joi.string().required().messages({
     'any.required': 'Payment terms are required',
   }),
@@ -219,6 +222,7 @@ const invoiceSchema = Joi.object({
     terms_and_condition: Joi.string().required(),
     payment_terms: Joi.string().required(),
     execution_time: Joi.string().required(),
+    note: Joi.string().required(),
     bank_details: Joi.string().required(),
     isPerforma: Joi.number().integer().min(0).max(1).required(), // Add this line
     payment_mode_id: Joi.number().integer().required(), // Add this line for payment_mode_id validation
