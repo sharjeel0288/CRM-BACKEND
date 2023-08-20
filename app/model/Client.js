@@ -57,12 +57,12 @@ class Client {
       const [result, fields] = await connection.query(insertQuery, [clientData]);
       return result.insertId;
     } catch (error) {
+      console.log(error)
       throw error;
     }
   }
 
   static async updateClient(id, clientData) {
-    console.log(clientData)
     try {
       if (!clientData || Object.keys(clientData).length === 0) {
         throw new Error('Please provide data to modify the client.');
@@ -88,9 +88,10 @@ class Client {
       return 'Client updated successfully.';
     } catch (error) {
       console.error(error); // Log the error for debugging
-      throw new Error('Failed to update the client.');
+      throw error; // Throw the original error, don't wrap it in a new error message
     }
   }
+  
   
 
 

@@ -12,14 +12,15 @@ const clientSchema = Joi.object({
   email: Joi.string().email().required(),
   date: Joi.date().allow(null),
   added_by_employee: Joi.string().allow('Admin').required(),
-  company_name: Joi.string(),
+  company_name: Joi.string().required(),
 });
 
 
 const validateClient = (req, res, next) => {
   const { error } = clientSchema.validate(req.body);
   if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+    console.log(error)
+    return res.status(400).json({ error: error.details[0].message });
   }
   next();
 };

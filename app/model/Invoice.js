@@ -45,7 +45,7 @@ class Invoice {
                 execution_time: invoiceData.execution_time,
                 bank_details: invoiceData.bank_details,
                 isPerforma: invoiceData.isPerforma,
-                payment_mode_id: paymentModeId,
+                payment_mode_id: invoiceData.paymentModeId,
 
             };
             const [invoiceInsertResult, ___] = await connection.query(insertInvoiceQuery, invoiceDataToInsert);
@@ -71,7 +71,7 @@ class Invoice {
 
             return invoiceId;
         } catch (error) {
-            console.error('Create invoice error:', error);
+            console.log('Create invoice error:', error);
             throw error;
         }
     }
@@ -134,7 +134,7 @@ class Invoice {
             if (invoices.length === 0) {
                 throw new Error('Invoice not found'); // Throw an error if invoice doesn't exist
             }
-           
+
             const invoice = invoices[0];
 
             // Get payments for the invoice
@@ -142,13 +142,13 @@ class Invoice {
             const invoiceItems = await Invoice.getInvoiceItemsByInvoiceId(invoiceId);
 
             const totalAmountPaid = invoicePayments.reduce((total, payment) => total + payment.amount, 0);
-            if (invoice.isPerforma==1){
-                invoice.isPerforma='Performa Invoice'
+            if (invoice.isPerforma == 1) {
+                invoice.isPerforma = 'Performa Invoice'
             }
-            else{
-                invoice.isPerforma='Tax Invoice'
+            else {
+                invoice.isPerforma = 'Tax Invoice'
             }
-            invoice.status=statusList[invoice.status-1]
+            invoice.status = statusList[invoice.status - 1]
             // Calculate total amount from InvoiceItemsData
             const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.item_total || 0), 0);
 
