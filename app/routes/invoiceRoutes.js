@@ -12,8 +12,8 @@ const router = express.Router();
 router.get('/invoice/:id/pdf', authMiddleware.authAdminAccounts, PDFController.GetInvoicePdfDetails);
 router.post('/invoice/create', validation.validateInvoice, invoiceController.createInvoice); // Corrected route and validation
 router.get('/invoice/all', invoiceController.getAllInvoices); // Corrected route
-router.get('/invoice/:id', authMiddleware.authAdminAccounts, invoiceController.getInvoiceById); // Corrected route
-router.put('/invoice/:id/edit', authMiddleware.authAdminAccounts, invoiceController.editInvoiceData); // Corrected route and validation
+router.get('/invoice/:id',  invoiceController.getInvoiceById); // Corrected route
+router.put('/invoice/:id/edit',  invoiceController.editInvoiceData); // Corrected route and validation
 router.delete('/invoice/:id/delete', invoiceController.deleteInvoice); // Corrected route
 
 router.use(invoiceItemRoutes);

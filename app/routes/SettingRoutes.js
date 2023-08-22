@@ -63,9 +63,9 @@ router.post('/logo/add-or-update', uploadLogo, settingController.addOrUpdateLogo
 router.post('/stamp/add-or-update', uploadStamp, settingController.addOrUpdateStampLogo);
 
 // Address and VAT number routes
-router.post('/address/add-or-update',authMiddleware.authenticateAdmin, settingController.addOrUpdateAddress);
-router.post('/vat-no/add-or-update',authMiddleware.authenticateAdmin, settingController.addOrUpdateVatNo);
-router.post('/name/add-or-update',authMiddleware.authenticateAdmin, settingController.addOrUpdateName);
+router.post('/address/add-or-update', settingController.addOrUpdateAddress);
+router.post('/vat-no/add-or-update', settingController.addOrUpdateVatNo);
+router.post('/name/add-or-update', settingController.addOrUpdateName);
 
 // Get settings route
 router.get('/get-settings', settingController.getSettings);

@@ -171,10 +171,7 @@ const quoteValidationSchema = Joi.object({
       // Add more validation rules for quote items fields
     })
   ),
-  payment_mode_id: Joi.number().integer().required().messages({
-    'number.base': 'Invalid payment mode ID value',
-    'any.required': 'Payment mode ID is required',
-  }),
+
 });
 
 const validateQuote = (req, res, next) => {
@@ -225,7 +222,6 @@ const invoiceSchema = Joi.object({
     note: Joi.string().required(),
     bank_details: Joi.string().required(),
     isPerforma: Joi.number().integer().min(0).max(1).required(), // Add this line
-    payment_mode_id: Joi.number().integer().required(), // Add this line for payment_mode_id validation
 
   }).required(),
   invoiceItemsData: Joi.array().items(Joi.object({
@@ -251,17 +247,48 @@ const validateInvoice = (req, res, next) => {
 };
 
 const invoiceItemSchema = Joi.object({
-  item_name: Joi.string().required(),
-  item_description: Joi.string().required(),
-  item_quantity: Joi.number().integer().min(1).required(),
-  item_xdim: Joi.number().required(),
-  item_ydim: Joi.number().required(),
-  item_price: Joi.number().required(),
-  item_subtotal: Joi.number().required(),
-  item_tax: Joi.number().required(),
-  item_total: Joi.number().required()
+  item_name: Joi.string().trim().required().messages({
+    'any.required': 'Item name is required',
+    'string.empty': 'Item name cannot be empty',
+  }),
+  item_description: Joi.string().trim().required().messages({
+    'any.required': 'Item description is required',
+    'string.empty': 'Item description cannot be empty',
+  }),
+  item_quantity: Joi.number().integer().min(1).required().messages({
+    'any.required': 'Item quantity is required',
+    'number.integer': 'Item quantity must be an integer',
+    'number.min': 'Item quantity must be at least 1',
+    'number.base': 'Item quantity must be a number',
+  }),
+  item_xdim: Joi.number().positive().required().messages({
+    'any.required': 'Item dimension X is required',
+    'number.base': 'Item dimension X must be a number',
+    'number.positive': 'Item dimension X must be a positive number',
+  }),
+  item_ydim: Joi.number().positive().required().messages({
+    'any.required': 'Item dimension Y is required',
+    'number.base': 'Item dimension Y must be a number',
+    'number.positive': 'Item dimension Y must be a positive number',
+  }),
+  item_price: Joi.number().positive().required().messages({
+    'any.required': 'Item price is required',
+    'number.base': 'Item price must be a number',
+    'number.positive': 'Item price must be a positive number',
+  }),
+  item_subtotal: Joi.number().required().messages({
+    'any.required': 'Item subtotal is required',
+    'number.base': 'Item subtotal must be a number',
+  }),
+  item_tax: Joi.number().required().messages({
+    'any.required': 'Item tax is required',
+    'number.base': 'Item tax must be a number',
+  }),
+  item_total: Joi.number().required().messages({
+    'any.required': 'Item total is required',
+    'number.base': 'Item total must be a number',
+  }),
 });
-
 const validateInvoiceItem = (req, res, next) => {
   const { error } = invoiceItemSchema.validate(req.body);
   if (error) {

@@ -57,7 +57,7 @@ const pool = mysql.createPool({
       CREATE TABLE IF NOT EXISTS invoice (
         id INT PRIMARY KEY AUTO_INCREMENT,
         client_id INT,
-        payment_mode_id INT, -- New column for payment mode
+      --  payment_mode_id INT, -- New column for payment mode
         isPerforma INT,
         number VARCHAR(50),
         invoice_current_date DATE,
@@ -69,8 +69,8 @@ const pool = mysql.createPool({
         execution_time VARCHAR(255),
         bank_details TEXT,
         added_by_employee INT, -- Employee ID who added the invoice
-        FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE,
-        FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) -- Foreign key reference to payment_mode
+        FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE
+       -- FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) 
         
     
     );
@@ -94,7 +94,7 @@ const pool = mysql.createPool({
       CREATE TABLE IF NOT EXISTS quote (
         id INT PRIMARY KEY AUTO_INCREMENT,
         client_id INT,
-        payment_mode_id INT, -- New column for payment mode
+       -- payment_mode_id INT,
         number VARCHAR(50),
         quote_current_date DATE,
         status INT,
@@ -105,8 +105,8 @@ const pool = mysql.createPool({
         payment_terms TEXT,
         execution_time VARCHAR(255),
         bank_details TEXT,
-        FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE,
-        FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) -- Foreign key reference to payment_mode
+        FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE
+     --   FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) 
     );
       
 

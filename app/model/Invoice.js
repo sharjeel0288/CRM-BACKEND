@@ -83,6 +83,7 @@ class Invoice {
                 FROM invoice q
                 JOIN client c ON q.client_id = c.id
                 JOIN employee e ON q.added_by_employee = e.id
+                ORDER BY invoice_date DESC
             `;
             const [invoices, fields] = await connection.query(selectQuery);
 
@@ -98,7 +99,7 @@ class Invoice {
                 // Calculate total amount from InvoiceItemsData
                 const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.item_total), 0);
                 const paymentStatus = calculatePaymentStatus(totalAmount, totalAmountPaid);
-                console.log('totalAmount', totalAmount)
+                // console.log('totalAmount', totalAmount)
 
                 const invoiceWithPaymentStatus = {
                     ...invoice,
@@ -206,6 +207,7 @@ class Invoice {
     }
 
     static async updateInvoiceData(invoiceId, updatedInvoiceData) {
+        console.log(updatedInvoiceData)
         try {
             // Fetch the existing invoice data
             const selectExistingInvoiceQuery = 'SELECT * FROM invoice WHERE id = ?';
@@ -224,7 +226,7 @@ class Invoice {
                 bank_details: updatedInvoiceData.bank_details || existingInvoiceData.bank_details,
                 added_by_employee: existingInvoiceData.added_by_employee,
                 isPerforma: updatedInvoiceData.isPerforma || existingInvoiceData.isPerforma,
-                payment_mode_id: updateQuoteData.paymentModeId || existingQuoteData.payment_mode_id
+                
             };
 
             // If client email is provided, update the client_id

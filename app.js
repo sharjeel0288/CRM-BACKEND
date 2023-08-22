@@ -14,7 +14,7 @@ const employeeRoutes = require('./app/routes/employeeRoutes');
 const settingRoutes = require('./app/routes/SettingRoutes');
 const bodyParser = require('body-parser');
 const reportRoutes = require('./app/routes/reportRoutes');
-
+const path = require('path'); 
 
 const app = express();
 const port = 3000;
@@ -27,6 +27,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
+
+// Serve static files from the 'uploads' directory
+app.use('/uploads/stamp', express.static(path.join(__dirname, 'uploads', 'stamp')));
+app.use('/uploads/logo', express.static(path.join(__dirname, 'uploads', 'logo')));
 
 // Routes
 app.use('/api', reportRoutes);

@@ -7,9 +7,9 @@ const validation = require('../utils/validation');
 
 const router = express.Router();
 
-router.post('/invoice/:invoice_id/item/add', authMiddleware.authAdminSales, validation.validateInvoiceItem, invoiceItemController.addInvoiceItem);
-router.delete('/invoice/item/:id/delete', authMiddleware.authAdminSales, invoiceItemController.deleteInvoiceItem);
-router.put('/invoice/item/:id/edit', authMiddleware.authAdminSales,  invoiceItemController.editInvoiceItem);
+router.post('/invoice/:invoice_id/item/add',  validation.validateInvoiceItem, invoiceItemController.addInvoiceItem);
+router.delete('/invoice/item/:id/delete',  invoiceItemController.deleteInvoiceItem);
+router.put('/invoice/item/:id/edit',   invoiceItemController.editInvoiceItem);
 
 module.exports = router;
 
