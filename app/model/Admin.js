@@ -95,7 +95,7 @@ class Admin {
 
             // Create the employee
             // You should validate and sanitize the employeeData here
-            const insertQuery = 'INSERT INTO employee SET ?';
+            const insertQuery = 'INSERT INTO employee SET ?, is_deleted = 0';
             const [result, fields] = await connection.query(insertQuery, [employeeData]);
             return result.insertId;
         } catch (error) {
@@ -103,12 +103,43 @@ class Admin {
             throw error;
         }
     }
+    static async editEmployee(employeeId, updatedEmployeeData) {
+        console.log("Sfsfsfsffs")
+        try {
+            // Check if the email already exists in the employee table (excluding the current employee)
+            const employeeEmailExistsQuery = 'SELECT id FROM employee WHERE email = ? AND id != ?';
+            const [existingEmployees, __] = await connection.query(employeeEmailExistsQuery, [updatedEmployeeData.email, employeeId]);
 
+            if (existingEmployees.length > 0) {
+                throw new Error('An employee with the provided email already exists.');
+            }
+
+            // Hash the updated employee's password before storing it
+            if (updatedEmployeeData.password) {
+                const hashedPassword = await bcrypt.hash(updatedEmployeeData.password, 10);
+                updatedEmployeeData.password = hashedPassword;
+            }
+
+            // Update the employee's information
+            const updateQuery = 'UPDATE employee SET ? WHERE id = ?';
+            const [result, fields] = await connection.query(updateQuery, [updatedEmployeeData, employeeId]);
+
+            console.log('Edit employee result:', result); // Log the result
+
+
+            return result;
+        } catch (error) {
+            console.error('Edit employee error:', error);
+            console.log(error)
+            throw error;
+        }
+    }
 
     static async deleteEmployeeById(employeeId) {
         try {
-            const deleteQuery = 'DELETE FROM employee WHERE id = ?';
-            const [result, fields] = await connection.query(deleteQuery, [employeeId]);
+            const updateQuery = 'UPDATE employee SET is_deleted = 1 WHERE id = ?';
+            const [result, fields] = await connection.query(updateQuery, [employeeId]);
+
             return result;
         } catch (error) {
             console.error('Delete employee error:', error);
@@ -118,7 +149,7 @@ class Admin {
 
     static async getAllEmployees() {
         try {
-            const selectQuery = 'SELECT * FROM employee';
+            const selectQuery = 'SELECT * FROM employee WHERE is_deleted = 0';
             const [employees, fields] = await connection.query(selectQuery);
             return employees;
         } catch (error) {
@@ -129,9 +160,10 @@ class Admin {
 
     static async getEmployeeById(employeeId) {
         try {
-            const selectQuery = 'SELECT * FROM employee WHERE id = ?';
+            const selectQuery = 'SELECT * FROM employee WHERE id = ? AND is_deleted = 0';
             const [employees, fields] = await connection.query(selectQuery, [employeeId]);
             return employees[0];
+
         } catch (error) {
             console.error('Get employee by ID error:', error);
             throw error;
@@ -203,23 +235,27 @@ class Admin {
     static async getAllQuotesWithItemsByEmployeeId(employeeId) {
         try {
             const selectQuery = `
-                SELECT q.id AS quote_id, q.client_id, q.number AS quote_number, q.quote_current_date AS quote_date, 
-                       q.status, q.expiry_date AS valid_until, q.terms_and_condition, q.payment_terms, q.execution_time,
-                       q.bank_details,
-                       qi.id AS item_id, qi.item_name, qi.item_description, qi.item_quantity, qi.item_xdim, 
-                       qi.item_ydim, qi.item_price, qi.item_subtotal, qi.item_tax, qi.item_total
-                FROM quote q
-                JOIN quote_item qi ON q.id = qi.quote_id
-                WHERE q.added_by_employee = ?;
-            `;
-    
+            SELECT q.id AS quote_id, q.client_id, q.number AS quote_number, q.quote_current_date AS quote_date, 
+                   q.status, q.expiry_date AS valid_until, q.terms_and_condition, q.payment_terms, q.execution_time,
+                   q.bank_details,
+                   qi.id AS item_id, qi.item_name, qi.item_description, qi.item_quantity, qi.item_xdim, 
+                   qi.item_ydim, qi.item_price, qi.item_subtotal, qi.item_tax, qi.item_total
+            FROM quote q
+            JOIN quote_item qi ON q.id = qi.quote_id
+            WHERE q.added_by_employee = ?;
+        `;
+
             const [quotesAndItems, fields] = await connection.query(selectQuery, [employeeId]);
-    
+
+            if (quotesAndItems.length === 0) {
+                throw new Error('No quotes found for the provided employee ID.');
+            }
+
             const formattedData = [];
-    
+
             for (const row of quotesAndItems) {
                 const existingQuote = formattedData.find(item => item.quote_id === row.quote_id);
-    
+
                 if (existingQuote) {
                     existingQuote.items.push({
                         item_id: row.item_id,
@@ -231,7 +267,7 @@ class Admin {
                         item_tax: row.item_tax,
                         item_total: row.item_total,
                     });
-    
+
                     // Update the total amount of the quote
                     existingQuote.total_amount += row.item_total;
                 } else {
@@ -262,35 +298,40 @@ class Admin {
                     });
                 }
             }
-    
+
             return formattedData;
         } catch (error) {
             console.error('Get all quotes by employee ID error:', error);
             throw new Error('Failed to fetch quotes for the provided employee ID.');
         }
     }
-    
-    
-    
-    
+
+
+
+
     static async getAllInvoicesWithItemsByEmployeeId(employeeId) {
         try {
             const selectQuery = `
-                SELECT i.id AS invoice_id, i.client_id, i.isPerforma, i.number, i.invoice_current_date, i.status,
-                       i.expiry_date, i.terms_and_condition, i.payment_terms, i.execution_time, i.bank_details,
-                       ii.id AS item_id, ii.item_name, ii.item_description, ii.item_quantity, ii.item_xdim, 
-                       ii.item_ydim, ii.item_price, ii.item_subtotal, ii.item_tax, ii.item_total
-                FROM invoice i
-                JOIN invoice_item ii ON i.id = ii.invoice_id
-                WHERE i.added_by_employee = ?;
-            `;
+            SELECT i.id AS invoice_id, i.client_id, i.isPerforma, i.number, i.invoice_current_date, i.status,
+                   i.expiry_date, i.terms_and_condition, i.payment_terms, i.execution_time, i.bank_details,
+                   ii.id AS item_id, ii.item_name, ii.item_description, ii.item_quantity, ii.item_xdim, 
+                   ii.item_ydim, ii.item_price, ii.item_subtotal, ii.item_tax, ii.item_total
+            FROM invoice i
+            JOIN invoice_item ii ON i.id = ii.invoice_id
+            WHERE i.added_by_employee = ?;
+        `;
+
             const [invoicesAndItems, fields] = await connection.query(selectQuery, [employeeId]);
-    
+
+            if (invoicesAndItems.length === 0) {
+                throw new Error('No invoices found for the provided employee ID.');
+            }
+
             const formattedData = [];
-    
+
             for (const row of invoicesAndItems) {
                 const existingInvoice = formattedData.find(item => item.invoice_id === row.invoice_id);
-    
+
                 if (existingInvoice) {
                     existingInvoice.items.push({
                         item_id: row.item_id,
@@ -304,7 +345,7 @@ class Admin {
                         item_tax: row.item_tax,
                         item_total: row.item_total,
                     });
-    
+
                     // Update the total amount of the invoice
                     existingInvoice.total_amount += row.item_total;
                 } else {
@@ -338,19 +379,19 @@ class Admin {
                     });
                 }
             }
-    
+
             return formattedData;
         } catch (error) {
             console.error('Get all invoices and items by employee ID error:', error);
             throw new Error('Failed to fetch invoices and items for the provided employee ID.');
         }
     }
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
 }
 
 

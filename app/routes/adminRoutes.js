@@ -10,10 +10,11 @@ const router = express.Router();
 router.post('/admin/signup', validation.validateAdminSignup, adminController.adminSignup);
 
 // employee
-router.post('/admin/create-employee', authMiddleware.authenticateAdmin, validation.validateEmployee, adminController.createEmployee);
-router.delete('/admin/delete-employee/:id', authMiddleware.authenticateAdmin, adminController.deleteEmployee);
-router.get('/admin/all-employees', authMiddleware.authenticateAdmin, adminController.getAllEmployees);
+router.post('/admin/create-employee', validation.validateEmployee, adminController.createEmployee);
+router.delete('/admin/delete-employee/:id', adminController.deleteEmployee);
+router.get('/admin/all-employees', adminController.getAllEmployees);
 router.get('/admin/employee/:id', authMiddleware.authenticateAdmin, adminController.getEmployeeById);
+router.put('/admin/edit-employee/:id', adminController.editEmployee);
 
 // announcement
 router.post('/admin/create-announcement', authMiddleware.authenticateAdmin, validation.validateAnnouncement, adminController.createAnnouncement);
@@ -23,10 +24,10 @@ router.get('/admin/announcement/:announcementId', authMiddleware.authenticateAdm
 
 
 // Get all quotes with quote items created by an employee with the "sales" department
-router.get('/admin/quotes-by-employee/:employeeId', authMiddleware.authenticateAdmin, adminController.getAllQuotesByEmployeeId);
+router.get('/admin/quotes-and-items-by-employee/:employeeId', adminController.getAllQuotesByEmployeeId);
 
 // Get all invoices and invoice items by employee ID
-router.get('/admin/invoices-and-items-by-employee/:employeeId', authMiddleware.authenticateAdmin, adminController.getAllInvoicesAndItemsByEmployeeId);
+router.get('/admin/invoices-and-items-by-employee/:employeeId', adminController.getAllInvoicesAndItemsByEmployeeId);
 
 
 module.exports = router;

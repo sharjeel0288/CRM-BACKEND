@@ -135,10 +135,12 @@ const pool = mysql.createPool({
         position VARCHAR(255),
         phone VARCHAR(15),
         email VARCHAR(255),
-        password VARCHAR(255)
+        password VARCHAR(255),
+        is_deleted BOOLEAN NOT NULL DEFAULT 0
       );
       -- Alter the table to set the AUTO_INCREMENT value
       ALTER TABLE employee AUTO_INCREMENT = 1000000;
+     -- ALTER TABLE employee ADD COLUMN ;
 
       
       CREATE TABLE IF NOT EXISTS setting (

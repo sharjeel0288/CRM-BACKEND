@@ -21,11 +21,11 @@ const adminSignup = async (req, res) => {
 // EMPLOYEE FUNCTIONS
 // Create employee
 const createEmployee = async (req, res) => {
-    const { department } = req.user;
+    // const { department } = req.user;
 
-    if (department !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Only admins are allowed to create employees.' });
-    }
+    // if (department !== 'admin') {
+    //     return res.status(403).json({ success: false, message: 'Only admins are allowed to create employees.' });
+    // }
 
     try {
         console.log('Creating employee with data:', req.body);
@@ -38,15 +38,30 @@ const createEmployee = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to create employee', error: error.message });
     }
 };
+
+const editEmployee = async (req, res, next) => {
+    const employeeId = req.params.id;
+    const updatedEmployeeData = req.body;
+console.log(updatedEmployeeData)
+    try {
+        const result = await Admin.editEmployee(employeeId, updatedEmployeeData);
+        console.log('Controller result:', result); // Log the result
+        res.status(200).json({ message: 'Employee updated successfully.' });
+    } catch (error) {
+        console.error('Controller error:', error);
+        res.status(500).json({ error: 'Failed to update employee.' });
+    }
+}
+
 // Delete employee by ID
 const deleteEmployee = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const department = req.user.department;
-        if (department !== 'admin') {
-            return res.status(403).json({ success: false, message: 'Only admins are allowed to delete employees.' });
-        }
+        // const department = req.user.department;
+        // if (department !== 'admin') {
+        //     return res.status(403).json({ success: false, message: 'Only admins are allowed to delete employees.' });
+        // }
 
         const result = await Admin.deleteEmployeeById(id);
         if (result.affectedRows === 0) {
@@ -63,10 +78,10 @@ const deleteEmployee = async (req, res) => {
 
 // Get all employees
 const getAllEmployees = async (req, res) => {
-    const department = req.user.department;
-    if (department !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Only admins are allowed to access employee list.' });
-    }
+    // const department = req.user.department;
+    // if (department !== 'admin') {
+    //     return res.status(403).json({ success: false, message: 'Only admins are allowed to access employee list.' });
+    // }
 
     try {
         const employees = await Admin.getAllEmployees();
@@ -206,6 +221,7 @@ const getAllInvoicesAndItemsByEmployeeId = async (req, res) => {
 module.exports = {
     adminSignup,
     createEmployee,
+    editEmployee,
     deleteEmployee,
     getAllEmployees,
     getEmployeeById,
