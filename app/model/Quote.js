@@ -1,9 +1,15 @@
 // app\model\Quote.js
 const connection = require('../../config/DbConfig');
+const Payment = require('../model/Payment')
+const { calculatePaymentStatus } = require('../utils/helpingFunctions');
+const { updateQuoteData } = require('./Quote');
+const Employee = require('./Employee')
+const Client = require('./Client')
 
 class Quote {
     static async createQuote(quoteData, quoteItemsData) {
         try {
+            
             const clientEmail = quoteData.client_email;
             const addedByEmployeeEmail = quoteData.employee_email;
 
@@ -59,6 +65,7 @@ class Quote {
 
             return quoteId;
         } catch (error) {
+            console.log(quoteData);
             console.error('Create quote error:', error);
             throw error;
         }

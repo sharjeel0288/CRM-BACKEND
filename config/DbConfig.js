@@ -4,9 +4,9 @@ const mysql = require('mysql2/promise'); // Import promise-based mysql2 library
 const dbConfig = {
   host: "localhost",
   user: "root",
-  password: "1234",
+  password: "ahzam",
   database: "CRM",
-  port: "3308",
+  port: "3306",
 };
 
 // Create a promise-based pool for MySQL connections
