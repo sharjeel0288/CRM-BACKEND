@@ -35,11 +35,12 @@ const getSalesReports = async (req, res) => {
     try {
         const { id } = req.user;
         const salesReport = await Report.getSalesReport(id); // Get sales report for the specific employee
-
+        const recentQuotes = await Report.getRecentQuotesOfEmployee(id)
         res.status(200).json({
             success: true,
 
             salesReport, // Include the sales report data
+            recentQuotes
         });
     } catch (error) {
         console.error('Get reports error:', error);
@@ -50,12 +51,13 @@ const getSalesReports = async (req, res) => {
 const getAccountsReports = async (req, res) => {
     try {
         const { id } = req.user;
-        const salesReport = await Report.getAccountsReport(id); // Get sales report for the specific employee
-
+        const accountsReport = await Report.getAccountsReport(id); // Get sales report for the specific employee
+        const recentInvoices = await Report.getRecentInvoicesOfEmployee(id)
         res.status(200).json({
             success: true,
 
-            salesReport, // Include the sales report data
+            accountsReport, // Include the sales report data
+            recentInvoices
         });
     } catch (error) {
         console.error('Get reports error:', error);

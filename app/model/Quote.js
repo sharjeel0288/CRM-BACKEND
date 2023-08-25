@@ -11,12 +11,23 @@ class Quote {
             const [clientResult, _] = await connection.query('SELECT id FROM client WHERE email = ?', [clientEmail]);
             const clientId = clientResult[0]?.id;
 
-            const [employeeResult, __] = await connection.query('SELECT id FROM employee WHERE email = ?', [addedByEmployeeEmail]);
+
+
+            // Find employee ID using employee's email
+            const [employeeResult] = await connection.query('SELECT id FROM employee WHERE email = ?', [addedByEmployeeEmail]);
             const addedByEmployeeId = employeeResult[0]?.id;
 
-            if (!clientId || !addedByEmployeeId) {
-                throw new Error('Client or employee not found.');
+            // Find admin ID using admin's email
+            const [adminResult] = await connection.query('SELECT id FROM admin WHERE email = ?', [addedByEmployeeEmail]);
+            const addedByAdminId = adminResult[0]?.id;
+
+            if (!clientId) {
+                throw new Error('Client not found.');
             }
+            if (!addedByEmployeeId && !addedByAdminId) {
+                throw new Error('Admin or employee not found.');
+            }
+
 
             // Generate a unique quote number
             const uniqueQuoteNumber = generateUniqueQuoteNumber();
@@ -34,7 +45,7 @@ class Quote {
                 payment_terms: quoteData.payment_terms,
                 execution_time: quoteData.execution_time,
                 bank_details: quoteData.bank_details,
-                payment_mode_id: paymentModeId,
+                // payment_mode_id: paymentModeId,
             };
             const [quoteInsertResult, ___] = await connection.query(insertQuoteQuery, quoteDataToInsert);
             const quoteId = quoteInsertResult.insertId;
@@ -66,10 +77,11 @@ class Quote {
     static async getAllQuotes() {
         try {
             const selectQuery = `
-                SELECT q.*, c.email AS client_email, e.email AS employee_email
-                FROM quote q
-                JOIN client c ON q.client_id = c.id
-                JOIN employee e ON q.added_by_employee = e.id
+            SELECT q.*, c.email AS client_email
+            FROM quote q
+            JOIN client c ON q.client_id = c.id
+            ORDER BY quote_current_date DESC
+            
             `;
             const [quotes, fields] = await connection.query(selectQuery);
 
@@ -99,26 +111,54 @@ class Quote {
         const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
         try {
             const selectQuery = `
-                SELECT q.*, c.email AS client_email, e.email AS employee_email,
+                SELECT q.*, c.email AS client_email,
+               
                 c.fname AS client_fname, c.lname AS client_lname,
-                e.name AS employee_name, e.surname AS employee_surname
+                c.phone as client_phone
                 FROM quote q
                 JOIN client c ON q.client_id = c.id
-                JOIN employee e ON q.added_by_employee = e.id
+                
                 WHERE q.id = ?;
             `;
             const [quotes, fields] = await connection.query(selectQuery, [quoteId]);
 
             if (quotes.length === 0) {
-                throw new Error('Invoice not found'); // Throw an error if invoice doesn't exist
+                throw new Error('quotes not found'); // Throw an error if invoice doesn't exist
             }
 
-            const invoice = quotes[0];
+            const quote = quotes[0];
 
+            // Fetch the creator (employee or admin) information
+            let addedByInfo = {
+                employee_name: '',
+                employee_surname: '',
+                employee_email: ''
+            };
+
+            const addedByEmployeeQuery = `SELECT * FROM employee WHERE id = ?`;
+            const [employeeResult, _] = await connection.query(addedByEmployeeQuery, [quote.added_by_employee]);
+            if (employeeResult.length > 0) {
+                addedByInfo = {
+                    employee_name: employeeResult[0].name,
+                    employee_surname: employeeResult[0].surname,
+                    employee_email: employeeResult[0].email
+                };
+            } else {
+                const addedByAdminQuery = `SELECT * FROM admin WHERE id = ?`;
+                const [adminResult, __] = await connection.query(addedByAdminQuery, [quote.added_by_employee]);
+
+                if (adminResult.length > 0) {
+                    addedByInfo = {
+                        employee_name: '',
+                        employee_surname: adminResult[0].lname, // Using lname field for admin's name
+                        employee_email: adminResult[0].email
+                    };
+                }
+            }
             // Get payments for the invoice
             const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
 
-            invoice.status = statusList[invoice.status - 1];
+            quote.status = statusList[quote.status - 1];
 
             // Calculate total amount from InvoiceItemsData
             const totalAmount = quoteItems.reduce((total, item) => total + parseFloat(item.item_total || 0), 0);
@@ -126,10 +166,13 @@ class Quote {
             const tax = 0.5;
 
             const QouteDetails = {
-                ...invoice, // Use invoice object instead of quotes object
+                ...quote, // Use invoice object instead of quotes object
                 total_amount: totalAmount,
                 SubTotal: SubTotal,
-                tax: tax
+                tax: tax,
+                employee_name: addedByInfo.employee_name,
+                employee_surname: addedByInfo.employee_surname, // Using lname field for admin's name
+                employee_email: addedByInfo.email
             };
 
             return QouteDetails;
@@ -188,7 +231,7 @@ class Quote {
                 execution_time: updatedQuoteData.execution_time || existingQuoteData.execution_time,
                 bank_details: updatedQuoteData.bank_details || existingQuoteData.bank_details,
                 added_by_employee: existingQuoteData.added_by_employee,
-                payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
+                // payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
 
             // If client email is provided, update the client_id

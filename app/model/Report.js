@@ -14,7 +14,7 @@ class Report {
         }
     }
     static async getSalesReport(employeeId) {
-        console.log('ID ',employeeId)
+        console.log('ID ', employeeId)
         try {
             const query = `
                 SELECT
@@ -31,16 +31,16 @@ class Report {
             `;
             const [result, _] = await connection.query(query, Array(11).fill(employeeId));
             console.log(result[0])
-            
+
             const quoteSet = result[0].total_quotes_count || 0;
             const quoteDraft = result[0].quote_draft_count || 0;
             const quoteApproved = result[0].quote_approved_count || 0;
-            
+
             const percentages = {};
             for (const status in result[0]) {
                 percentages[status.replace('quote_', '').toLowerCase()] = ((result[0][status] / quoteSet) * 100).toFixed(2);
             }
-    
+
             return {
                 quoteSet,
                 quoteDraft,
@@ -53,7 +53,7 @@ class Report {
         }
     }
     static async getAccountsReport(employeeId) {
-        console.log('ID asasasf',employeeId)
+        console.log('ID asasasf', employeeId)
         try {
             const query = `
                 SELECT
@@ -69,16 +69,16 @@ class Report {
                     (SELECT COUNT(*) FROM invoice WHERE status = 6 AND added_by_employee = ?) AS invoice_approved_count
             `;
             const [result, _] = await connection.query(query, Array(11).fill(employeeId));
-                console.log(result)
+            console.log(result)
             const invoiceSet = result[0].total_invoice_count || 0;
             const invoiceDraft = result[0].invoice_draft_count || 0;
             const invoiceApproved = result[0].invoice_approved_count || 0;
-            
+
             const percentages = {};
             for (const status in result[0]) {
                 percentages[status.replace('invoice_', '').toLowerCase()] = ((result[0][status] / invoiceSet) * 100).toFixed(2);
             }
-    
+
             return {
                 invoiceSet,
                 invoiceDraft,
@@ -109,14 +109,14 @@ class Report {
             for (const status in result[0]) {
                 percentages[status.replace('invoice_', '').toLowerCase()] = ((result[0][status] / totalCount) * 100).toFixed(2);
             }
-           
+
             return percentages;
         } catch (error) {
             console.error('Get invoice status percentages error:', error);
             throw error;
         }
     }
-    
+
     static async getTotalQuotesSent() {
         try {
             const query = 'SELECT COUNT(*) AS total_quotes_sent FROM quote WHERE status = 3';
@@ -208,9 +208,8 @@ class Report {
                        q.quote_current_date AS quote_date, q.status,
                        q.terms_and_condition, q.payment_terms,
                        SUM(qi.item_total) AS total_amount,
-                       pm.name AS payment_mode_name
+                       q.added_by_employee
                 FROM quote q
-                LEFT JOIN payment_mode pm ON q.payment_mode_id = pm.id
                 LEFT JOIN quote_item qi ON q.id = qi.quote_id
                 LEFT JOIN client c ON q.client_id = c.id
                 GROUP BY q.id
@@ -218,13 +217,103 @@ class Report {
                 LIMIT ?;
             `;
             const [quotes, _] = await connection.query(query, [limit]);
-            return quotes;
+
+            const recentQuotesWithEmployeeInfo = [];
+
+            for (const quote of quotes) {
+                const addedByInfo = {
+                    employee_name: '',
+                    employee_surname: '',
+                };
+
+                const addedByEmployeeQuery = `SELECT * FROM employee WHERE id = ?`;
+                const [employeeResult] = await connection.query(addedByEmployeeQuery, [quote.added_by_employee]);
+
+                if (employeeResult.length > 0) {
+                    addedByInfo.employee_name = employeeResult[0].name;
+                    addedByInfo.employee_surname = employeeResult[0].surname;
+                } else {
+                    const addedByAdminQuery = `SELECT * FROM admin WHERE id = ?`;
+                    const [adminResult] = await connection.query(addedByAdminQuery, [quote.added_by_employee]);
+
+                    if (adminResult.length > 0) {
+                        addedByInfo.employee_surname = adminResult[0].lname; // Using lname field for admin's name
+                    }
+                }
+
+                const quoteWithInfo = {
+                    ...quote,
+                    employee_name: addedByInfo.employee_name,
+                    employee_surname: addedByInfo.employee_surname,
+                };
+
+                recentQuotesWithEmployeeInfo.push(quoteWithInfo);
+            }
+
+            return recentQuotesWithEmployeeInfo;
         } catch (error) {
             console.error('Get recent quotes error:', error);
             throw error;
         }
     }
-    
+
+
+    static async getRecentQuotesOfEmployee(id) {
+        try {
+            const query = `
+                SELECT CONCAT(c.fname, ' ', c.lname) AS client_name,
+                       q.quote_current_date AS quote_date, q.status,
+                       q.terms_and_condition, q.payment_terms,
+                       SUM(qi.item_total) AS total_amount,
+                       q.added_by_employee
+                FROM quote q
+                LEFT JOIN quote_item qi ON q.id = qi.quote_id
+                LEFT JOIN client c ON q.client_id = c.id
+                WHERE q.added_by_employee = ?
+                GROUP BY q.id
+                ORDER BY q.quote_current_date DESC
+                LIMIT 5;
+            `;
+            const [quotes, _] = await connection.query(query, [id]);
+
+            const recentQuotesWithEmployeeInfo = [];
+
+            for (const quote of quotes) {
+                const addedByInfo = {
+                    employee_name: '',
+                    employee_surname: '',
+                };
+
+                const addedByEmployeeQuery = `SELECT * FROM employee WHERE id = ?`;
+                const [employeeResult] = await connection.query(addedByEmployeeQuery, [quote.added_by_employee]);
+
+                if (employeeResult.length > 0) {
+                    addedByInfo.employee_name = employeeResult[0].name;
+                    addedByInfo.employee_surname = employeeResult[0].surname;
+                } else {
+                    const addedByAdminQuery = `SELECT * FROM admin WHERE id = ?`;
+                    const [adminResult] = await connection.query(addedByAdminQuery, [quote.added_by_employee]);
+
+                    if (adminResult.length > 0) {
+                        addedByInfo.employee_surname = adminResult[0].lname; // Using lname field for admin's name
+                    }
+                }
+
+                const quoteWithInfo = {
+                    ...quote,
+                    employee_name: addedByInfo.employee_name,
+                    employee_surname: addedByInfo.employee_surname,
+                };
+
+                recentQuotesWithEmployeeInfo.push(quoteWithInfo);
+            }
+
+            return recentQuotesWithEmployeeInfo;
+        } catch (error) {
+            console.error('Get recent quotes error:', error);
+            throw error;
+        }
+    }
 
 
     static async getRecentInvoices(limit) {
@@ -233,10 +322,8 @@ class Report {
                 SELECT CONCAT(c.fname, ' ', c.lname) AS client_name,
                        i.invoice_current_date AS invoice_date, i.status,
                        i.terms_and_condition, i.payment_terms,
-                       SUM(ii.item_total) AS total_amount,
-                       pm.name AS payment_mode_name
+                       SUM(ii.item_total) AS total_amount
                 FROM invoice i
-                LEFT JOIN payment_mode pm ON i.payment_mode_id = pm.id
                 LEFT JOIN invoice_item ii ON i.id = ii.invoice_id
                 LEFT JOIN client c ON i.client_id = c.id
                 GROUP BY i.id
@@ -250,8 +337,30 @@ class Report {
             throw error;
         }
     }
-    
-    
+    static async getRecentInvoicesOfEmployee(id) {
+        try {
+            const query = `
+                SELECT CONCAT(c.fname, ' ', c.lname) AS client_name,
+                       i.invoice_current_date AS invoice_date, i.status,
+                       i.terms_and_condition, i.payment_terms,
+                       SUM(ii.item_total) AS total_amount
+                FROM invoice i
+                LEFT JOIN invoice_item ii ON i.id = ii.invoice_id
+                LEFT JOIN client c ON i.client_id = c.id
+                WHERE i.added_by_employee = ?
+                GROUP BY i.id
+                ORDER BY i.invoice_current_date DESC
+                LIMIT 5;
+            `;
+            const [invoices, _] = await connection.query(query, [id]);
+            return invoices;
+        } catch (error) {
+            console.error('Get recent invoices error:', error);
+            throw error;
+        }
+    }
+
+
 }
 
 module.exports = Report;

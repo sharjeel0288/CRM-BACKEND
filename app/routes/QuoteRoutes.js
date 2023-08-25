@@ -8,7 +8,7 @@ const quoteItemRoutes = require('./quoteItemRoutes');
 const router = express.Router();
 
 router.get('/quote/:id/pdf',authMiddleware.authAdminSales, PDFController.GetQuotePdfDetails);
-router.post('/quote/create', authMiddleware.authAdminSales,validation.validateQuote, quoteController.createQuote);
+router.post('/quote/create',validation.validateQuote, quoteController.createQuote);
 router.get('/quote/all', quoteController.getAllQuotes);
 router.get('/quote/:id',authMiddleware.authAdminSales, quoteController.getQuoteById);
 router.put('/quote/:id/edit',authMiddleware.authAdminSales, quoteController.editQuoteData); 

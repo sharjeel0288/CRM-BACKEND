@@ -118,12 +118,12 @@ const getEmployeeById = async (req, res) => {
 
 // Create announcement
 const createAnnouncement = async (req, res) => {
-    const { department } = req.user; // Extract employee's email from req.user
+    // const { department } = req.user; // Extract employee's email from req.user
 
-    if (department !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Only admins are allowed to create announcements.' });
-    }
-
+    // if (department !== 'admin') {
+    //     return res.status(403).json({ success: false, message: 'Only admins are allowed to create announcements.' });
+    // }
+console.log("asfasf")
     try {
         const newAnnouncementId = await Admin.createAnnouncement(req.body);
         res.status(201).json({ success: true, message: 'Announcement created successfully', announcementId: newAnnouncementId });

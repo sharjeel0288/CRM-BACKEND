@@ -17,7 +17,7 @@ router.get('/admin/employee/:id', authMiddleware.authenticateAdmin, adminControl
 router.put('/admin/edit-employee/:id', adminController.editEmployee);
 
 // announcement
-router.post('/admin/create-announcement', authMiddleware.authenticateAdmin, validation.validateAnnouncement, adminController.createAnnouncement);
+router.post('/admin/create-announcement', validation.validateAnnouncement, adminController.createAnnouncement);
 router.delete('/admin/delete-announcement/:announcementId', authMiddleware.authenticateAdmin, adminController.deleteAnnouncement);
 router.get('/admin/all-announcements', authMiddleware.authenticateAdmin, adminController.getAllAnnouncements); // New route to get all announcements
 router.get('/admin/announcement/:announcementId', authMiddleware.authenticateAdmin, adminController.getAnnouncementById); // New route to get announcement by ID

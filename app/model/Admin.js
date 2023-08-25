@@ -235,13 +235,15 @@ class Admin {
     static async getAllQuotesWithItemsByEmployeeId(employeeId) {
         try {
             const selectQuery = `
-            SELECT q.id AS quote_id, q.client_id, q.number AS quote_number, q.quote_current_date AS quote_date, 
+            SELECT q.id AS quote_id, q.client_id, CONCAT(c.fname, ' ', c.lname) AS client_name, 
+                   q.number AS quote_number, q.quote_current_date AS quote_date, 
                    q.status, q.expiry_date AS valid_until, q.terms_and_condition, q.payment_terms, q.execution_time,
                    q.bank_details,
                    qi.id AS item_id, qi.item_name, qi.item_description, qi.item_quantity, qi.item_xdim, 
                    qi.item_ydim, qi.item_price, qi.item_subtotal, qi.item_tax, qi.item_total
             FROM quote q
             JOIN quote_item qi ON q.id = qi.quote_id
+            JOIN client c ON q.client_id = c.id
             WHERE q.added_by_employee = ?;
         `;
 
@@ -274,6 +276,7 @@ class Admin {
                     formattedData.push({
                         quote_id: row.quote_id,
                         client_id: row.client_id,
+                        client_name: row.client_name,
                         quote_number: row.quote_number,
                         quote_date: row.quote_date,
                         status: row.status,
@@ -308,16 +311,19 @@ class Admin {
 
 
 
-
     static async getAllInvoicesWithItemsByEmployeeId(employeeId) {
         try {
             const selectQuery = `
-            SELECT i.id AS invoice_id, i.client_id, i.isPerforma, i.number, i.invoice_current_date, i.status,
+            SELECT i.id AS invoice_id, i.client_id, CONCAT(c.fname, ' ', c.lname) AS client_name,
+                   i.isPerforma, i.number, i.invoice_current_date, i.status,
                    i.expiry_date, i.terms_and_condition, i.payment_terms, i.execution_time, i.bank_details,
                    ii.id AS item_id, ii.item_name, ii.item_description, ii.item_quantity, ii.item_xdim, 
-                   ii.item_ydim, ii.item_price, ii.item_subtotal, ii.item_tax, ii.item_total
+                   ii.item_ydim, ii.item_price, ii.item_subtotal, ii.item_tax, ii.item_total,
+                   p.amount AS payment_amount
             FROM invoice i
             JOIN invoice_item ii ON i.id = ii.invoice_id
+            LEFT JOIN payment p ON i.id = p.invoice_id
+            JOIN client c ON i.client_id = c.id
             WHERE i.added_by_employee = ?;
         `;
 
@@ -344,8 +350,8 @@ class Admin {
                         item_subtotal: row.item_subtotal,
                         item_tax: row.item_tax,
                         item_total: row.item_total,
+                        
                     });
-
                     // Update the total amount of the invoice
                     existingInvoice.total_amount += row.item_total;
                 } else {
@@ -362,6 +368,8 @@ class Admin {
                         execution_time: row.execution_time,
                         bank_details: row.bank_details,
                         total_amount: row.item_total, // Initialize with the first item's total
+                        client_name:row.client_name,
+                        
                         items: [
                             {
                                 item_id: row.item_id,
@@ -375,15 +383,16 @@ class Admin {
                                 item_tax: row.item_tax,
                                 item_total: row.item_total,
                             }
-                        ]
+                        ],
+                        payment_amount: row.payment_amount || 0, // Default to 0 if payment_amount is null
                     });
                 }
             }
 
             return formattedData;
         } catch (error) {
-            console.error('Get all invoices and items by employee ID error:', error);
-            throw new Error('Failed to fetch invoices and items for the provided employee ID.');
+            console.error('Get all invoices, items, and amount by employee ID error:', error);
+            throw new Error('Failed to fetch invoices, items, and amount for the provided employee ID.');
         }
     }
 

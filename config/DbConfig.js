@@ -34,7 +34,7 @@ const pool = mysql.createPool({
         password VARCHAR(255),    
         email VARCHAR(255)
       );
-      
+
       CREATE TABLE IF NOT EXISTS payment_mode (
         id INT PRIMARY KEY AUTO_INCREMENT,
         name VARCHAR(255),
@@ -71,10 +71,10 @@ const pool = mysql.createPool({
         bank_details TEXT,
         added_by_employee INT, -- Employee ID who added the invoice
         FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE
-       -- FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) 
         
-    
-    );
+        
+        );
+        -- FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) 
       
 
       CREATE TABLE IF NOT EXISTS invoice_item (
@@ -107,8 +107,8 @@ const pool = mysql.createPool({
         execution_time VARCHAR(255),
         bank_details TEXT,
         FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE
-     --   FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) 
-    );
+        );
+        --   FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) 
       
 
 

@@ -16,16 +16,25 @@ class Invoice {
             const clientEmail = invoiceData.client_email;
             const addedByEmployeeEmail = invoiceData.employee_email;
 
-            // Find client and employee IDs using their emails
+            // Find client ID using client's email
             const [clientResult, _] = await connection.query('SELECT id FROM client WHERE email = ?', [clientEmail]);
             const clientId = clientResult[0]?.id;
 
-            const [employeeResult, __] = await connection.query('SELECT id FROM employee WHERE email = ?', [addedByEmployeeEmail]);
+            // Find employee ID using employee's email
+            const [employeeResult] = await connection.query('SELECT id FROM employee WHERE email = ?', [addedByEmployeeEmail]);
             const addedByEmployeeId = employeeResult[0]?.id;
 
-            if (!clientId || !addedByEmployeeId) {
-                throw new Error('Client or employee not found.');
+            // Find admin ID using admin's email
+            const [adminResult] = await connection.query('SELECT id FROM admin WHERE email = ?', [addedByEmployeeEmail]);
+            const addedByAdminId = adminResult[0]?.id;
+
+            if (!clientId) {
+                throw new Error('Client not found.');
             }
+            if (!addedByEmployeeId && !addedByAdminId) {
+                throw new Error('Admin or employee not found.');
+            }
+
 
             // Generate a unique invoice number
             const uniqueInvoiceNumber = generateUniqueInvoiceNumber();
@@ -38,7 +47,7 @@ class Invoice {
                 invoice_date: new Date(),
                 invoice_current_date: new Date(),
                 status: invoiceData.status,
-                added_by_employee: addedByEmployeeId,
+                added_by_employee: addedByEmployeeId || addedByAdminId,
                 expiry_date: invoiceData.expiry_date,
                 terms_and_condition: invoiceData.terms_and_condition,
                 payment_terms: invoiceData.payment_terms,
@@ -79,15 +88,15 @@ class Invoice {
     static async getAllInvoices() {
         try {
             const selectQuery = `
-                SELECT q.*, c.email AS client_email, e.email AS employee_email
+                SELECT q.*, c.email AS client_email
                 FROM invoice q
                 JOIN client c ON q.client_id = c.id
-                JOIN employee e ON q.added_by_employee = e.id
                 ORDER BY invoice_date DESC
             `;
             const [invoices, fields] = await connection.query(selectQuery);
 
             const invoicesWithPaymentStatus = [];
+
 
             for (const invoice of invoices) {
                 const invoiceId = invoice.id;
@@ -120,39 +129,60 @@ class Invoice {
 
     static async getInvoiceById(invoiceId) {
         const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
+
         try {
             const selectQuery = `
-                SELECT q.*, c.email AS client_email, e.email AS employee_email,
+                SELECT q.*, c.email AS client_email,
                 c.fname AS client_fname, c.lname AS client_lname,
-                e.name AS employee_name, e.surname AS employee_surname, c.phone as client_phone
+                c.phone as client_phone
                 FROM invoice q
                 JOIN client c ON q.client_id = c.id
-                JOIN employee e ON q.added_by_employee = e.id
                 WHERE q.id = ?;
             `;
             const [invoices, fields] = await connection.query(selectQuery, [invoiceId]);
 
             if (invoices.length === 0) {
-                throw new Error('Invoice not found'); // Throw an error if invoice doesn't exist
+                throw new Error('Invoice not found');
             }
 
             const invoice = invoices[0];
+
+            // Fetch the creator (employee or admin) information
+            let addedByInfo = {
+                employee_name: '',
+                employee_surname: '',
+            };
+
+            const addedByEmployeeQuery = `SELECT * FROM employee WHERE id = ?`;
+            const [employeeResult, _] = await connection.query(addedByEmployeeQuery, [invoice.added_by_employee]);
+
+            if (employeeResult.length > 0) {
+                addedByInfo = {
+                    employee_name: employeeResult[0].name,
+                    employee_surname: employeeResult[0].surname,
+                    employee_email: employeeResult[0].email
+                };
+            } else {
+                const addedByAdminQuery = `SELECT * FROM admin WHERE id = ?`;
+                const [adminResult, __] = await connection.query(addedByAdminQuery, [invoice.added_by_employee]);
+
+                if (adminResult.length > 0) {
+                    addedByInfo = {
+                        employee_name: '',
+                        employee_surname: adminResult[0].lname, // Using lname field for admin's name
+                        employee_email: adminResult[0].email
+                    };
+                }
+            }
 
             // Get payments for the invoice
             const invoicePayments = await Payment.getAllPaymentsByInvoiceId(invoiceId);
             const invoiceItems = await Invoice.getInvoiceItemsByInvoiceId(invoiceId);
 
             const totalAmountPaid = invoicePayments.reduce((total, payment) => total + payment.amount, 0);
-            if (invoice.isPerforma == 1) {
-                invoice.isPerforma = 'PERFORMA INVOICE'
-            }
-            else {
-                invoice.isPerforma = 'TAX INVOICE'
-            }
-            invoice.status = statusList[invoice.status - 1]
-            // Calculate total amount from InvoiceItemsData
+            const isPerforma = invoice.isPerforma === 1 ? 'PERFORMA INVOICE' : 'TAX INVOICE';
+            const invoiceStatus = statusList[invoice.status - 1];
             const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.item_total || 0), 0);
-
             const paymentStatus = calculatePaymentStatus(totalAmount, totalAmountPaid);
 
             const invoiceWithPaymentStatus = {
@@ -160,7 +190,11 @@ class Invoice {
                 payment_status: paymentStatus,
                 total_amount_paid: totalAmountPaid,
                 total_amount: totalAmount,
-
+                isPerforma: isPerforma,
+                status: invoiceStatus,
+                employee_name: addedByInfo.employee_name,
+                employee_surname: addedByInfo.employee_surname,
+                employee_email: addedByInfo.email
             };
 
             return invoiceWithPaymentStatus;
@@ -169,6 +203,7 @@ class Invoice {
             throw error;
         }
     }
+
 
 
 
@@ -207,7 +242,7 @@ class Invoice {
     }
 
     static async updateInvoiceData(invoiceId, updatedInvoiceData) {
-        console.log(updatedInvoiceData)
+        console.log("updatedInvoiceData:", updatedInvoiceData)
         try {
             // Fetch the existing invoice data
             const selectExistingInvoiceQuery = 'SELECT * FROM invoice WHERE id = ?';
@@ -226,8 +261,18 @@ class Invoice {
                 bank_details: updatedInvoiceData.bank_details || existingInvoiceData.bank_details,
                 added_by_employee: existingInvoiceData.added_by_employee,
                 isPerforma: updatedInvoiceData.isPerforma || existingInvoiceData.isPerforma,
-                
+                note: updatedInvoiceData.note || existingInvoiceData.note
+
             };
+            // Convert the provided expiry_date string to a JavaScript Date object
+            // const expiryDate = new Date(updatedInvoiceData.expiry_date);
+
+            // // If the conversion is successful, update the newInvoiceData object
+            // if (!isNaN(expiryDate)) {
+            //     newInvoiceData.expiry_date = expiryDate;
+            // }
+            console.log("newInvoiceData:", newInvoiceData)
+            console.log("existingInvoiceData:", existingInvoiceData)
 
             // If client email is provided, update the client_id
             if (updatedInvoiceData.client_email) {
@@ -239,8 +284,8 @@ class Invoice {
             }
 
             const updateInvoiceQuery = 'UPDATE invoice SET ? WHERE id = ?';
-            await connection.query(updateInvoiceQuery, [newInvoiceData, invoiceId]);
-
+            const res = await connection.query(updateInvoiceQuery, [newInvoiceData, invoiceId]);
+            console.log(res)
             return { success: true, message: 'Invoice data updated successfully' };
         } catch (error) {
             console.error('Update invoice data error:', error);
