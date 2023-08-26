@@ -109,7 +109,7 @@ const quoteItemValidationSchema = Joi.object({
     'number.base': 'Invalid item subtotal',
     'any.required': 'Item subtotal is required',
   }),
-  item_tax: Joi.number().positive().required().messages({
+  item_tax: Joi.number().required().messages({
     'number.base': 'Invalid item tax',
     'any.required': 'Item tax is required',
   }),
