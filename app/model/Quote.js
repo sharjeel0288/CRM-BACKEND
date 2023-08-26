@@ -157,7 +157,7 @@ class Quote {
                 if (adminResult.length > 0) {
                     addedByInfo = {
                         employee_name: '',
-                        employee_surname: adminResult[0].lname, // Using lname field for admin's name
+                        employee_surname: 'admin', // Using lname field for admin's name
                         employee_email: adminResult[0].email
                     };
                 }
