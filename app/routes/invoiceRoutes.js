@@ -9,11 +9,11 @@ const PDFController = require('../controllers/PDFController');
 const paymentRoutes = require('./paymentRoutes');
 const router = express.Router();
 
-router.get('/invoice/:id/pdf', authMiddleware.authAdminAccounts, PDFController.GetInvoicePdfDetails);
+router.get('/invoice/:id/pdf', PDFController.GetInvoicePdfDetails);
 router.post('/invoice/create', validation.validateInvoice, invoiceController.createInvoice); // Corrected route and validation
 router.get('/invoice/all', invoiceController.getAllInvoices); // Corrected route
-router.get('/invoice/:id',  invoiceController.getInvoiceById); // Corrected route
-router.put('/invoice/:id/edit',  invoiceController.editInvoiceData); // Corrected route and validation
+router.get('/invoice/:id', invoiceController.getInvoiceById); // Corrected route
+router.put('/invoice/:id/edit', invoiceController.editInvoiceData); // Corrected route and validation
 router.delete('/invoice/:id/delete', invoiceController.deleteInvoice); // Corrected route
 
 router.use(invoiceItemRoutes);

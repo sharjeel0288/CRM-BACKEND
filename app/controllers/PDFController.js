@@ -109,7 +109,7 @@ const GetInvoicePdfDetails = async (req, res) => {
         const total = subtotal + tax;
         // Placeholder response indicating success
         res.status(200).json({
-            success: true, message: 'Quote PDF details generated successfully', data: {
+            success: true, message: 'Invoice PDF details generated successfully', data: {
                 invoiceData,
                 invoiceItems,
                 settings,
@@ -120,7 +120,7 @@ const GetInvoicePdfDetails = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Generate quote PDF error:', error);
+        console.error('Generate Invoice PDF error:', error);
         res.status(500).json({ success: false, message: 'An error occurred while generating PDF', error: error.message });
     }
 };
