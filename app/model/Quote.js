@@ -9,7 +9,7 @@ const Client = require('./Client')
 class Quote {
     static async createQuote(quoteData, quoteItemsData) {
         try {
-            
+
             const clientEmail = quoteData.client_email;
             const addedByEmployeeEmail = quoteData.employee_email;
 
@@ -45,7 +45,7 @@ class Quote {
                 number: uniqueQuoteNumber,
                 quote_current_date: new Date(),
                 status: quoteData.status,
-                added_by_employee: addedByEmployeeId,
+                added_by_employee: addedByEmployeeId || addedByAdminId,
                 expiry_date: quoteData.expiry_date,
                 terms_and_condition: quoteData.terms_and_condition,
                 payment_terms: quoteData.payment_terms,
