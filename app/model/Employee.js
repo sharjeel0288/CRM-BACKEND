@@ -2,6 +2,7 @@
 const connection = require('../../config/DbConfig');
 const jwtUtils = require('../utils/jwtUtils'); // Import the jwtUtils module
 const bcrypt = require('bcrypt');
+const Quote = require('./Quote');
 
 class Employee {
     static async getEmployeeByEmail(email) {
@@ -192,6 +193,35 @@ class Employee {
             return employees[0];
         } catch (error) {
             console.error('Error fetching employee:', error.message);
+            throw error;
+        }
+    }
+
+    static async getLostQuotesByEmployeeId(employeeId) {
+        try {
+            const selectQuery = 'SELECT * FROM lost_quote WHERE assigned_to_employee = ? AND isDone = 0';
+            const [lostQuotes, _] = await connection.query(selectQuery, [employeeId]);
+
+            const lostQuotesWithQuoteInfo = await Promise.all(lostQuotes.map(async (lostQuote) => {
+                const quoteId = lostQuote.quote_id;
+                const quoteDetails = await Quote.getQuoteById(quoteId);
+                return { ...lostQuote, quoteDetails };
+            }));
+
+            return lostQuotesWithQuoteInfo;
+        } catch (error) {
+            console.error('Get lost quotes by employee ID error:', error);
+            throw error;
+        }
+    }
+
+    static async markAsDone(lostQuoteId, message) {
+        try {
+            const updateQuery = 'UPDATE lost_quote SET isDone = 1, message = ? WHERE id = ?';
+            const [result, _] = await connection.query(updateQuery, [message, lostQuoteId]);
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Mark lost quote as done error:', error);
             throw error;
         }
     }

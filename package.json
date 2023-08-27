@@ -6,7 +6,6 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon server"
-    
   },
   "author": "",
   "license": "ISC",
@@ -20,6 +19,7 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.6.0",
     "node-fetch": "^3.3.2",
+    "node-schedule": "^2.1.1",
     "nodemon": "^3.0.1",
     "pdf-lib": "^1.17.1",
     "pdfkit": "^0.13.0",

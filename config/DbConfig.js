@@ -177,14 +177,13 @@ const pool = mysql.createPool({
         FOREIGN KEY (employee_id) REFERENCES employee(id)
     );
     
-      CREATE TABLE IF NOT EXISTS lost_quote_invoice (
+      CREATE TABLE IF NOT EXISTS lost_quote (
         id INT PRIMARY KEY AUTO_INCREMENT,
         quote_id INT,
-        invoice_id INT,
-        status INT, -- 1 for lost quote, 2 for lost invoice
         assigned_to_employee INT, -- Employee ID assigned to this lost quote/invoice
+        message TEXT,
+        isDone INT default 0,
         FOREIGN KEY (quote_id) REFERENCES quote(id),
-        FOREIGN KEY (invoice_id) REFERENCES invoice(id),
         FOREIGN KEY (assigned_to_employee) REFERENCES employee(id)
     );
       `;

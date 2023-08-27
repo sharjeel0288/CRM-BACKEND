@@ -4,6 +4,7 @@ const connection = require('../../config/DbConfig');
 const bcrypt = require('bcrypt');
 const jwtUtils = require('../utils/jwtUtils'); // Import the jwtUtils module
 const { calculatePaymentStatus } = require('../utils/helpingFunctions'); // Update the path accordingly
+const Quote = require('./Quote');
 
 
 class Admin {
@@ -231,7 +232,33 @@ class Admin {
             throw error;
         }
     }
+    static async getAllLostQuotes() {
+        try {
+            const selectQuery = 'SELECT * FROM lost_quote ';
+            const [lostQuotes, _] = await connection.query(selectQuery);
 
+            const lostQuotesWithQuoteInfo = await Promise.all(lostQuotes.map(async (lostQuote) => {
+                const quoteId = lostQuote.quote_id;
+                const quoteDetails = await Quote.getQuoteById(quoteId);
+                return { ...lostQuote, quoteDetails };
+            }));
+
+            return lostQuotesWithQuoteInfo;
+        } catch (error) {
+            console.error('Get lost quotes by admin  error:', error);
+            throw error;
+        }
+    }
+    static async deleteLostQuoteById(lostQuoteId) {
+        try {
+            const deleteQuery = 'DELETE FROM lost_quote WHERE id = ?';
+            const [result, _] = await connection.query(deleteQuery, [lostQuoteId]);
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Delete lost quote error:', error);
+            throw error;
+        }
+    }
     static async getAllQuotesWithItemsByEmployeeId(employeeId) {
         try {
             const selectQuery = `
@@ -350,7 +377,7 @@ class Admin {
                         item_subtotal: row.item_subtotal,
                         item_tax: row.item_tax,
                         item_total: row.item_total,
-                        
+
                     });
                     // Update the total amount of the invoice
                     existingInvoice.total_amount += row.item_total;
@@ -368,8 +395,8 @@ class Admin {
                         execution_time: row.execution_time,
                         bank_details: row.bank_details,
                         total_amount: row.item_total, // Initialize with the first item's total
-                        client_name:row.client_name,
-                        
+                        client_name: row.client_name,
+
                         items: [
                             {
                                 item_id: row.item_id,

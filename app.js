@@ -14,7 +14,7 @@ const employeeRoutes = require('./app/routes/employeeRoutes');
 const settingRoutes = require('./app/routes/SettingRoutes');
 const bodyParser = require('body-parser');
 const reportRoutes = require('./app/routes/reportRoutes');
-const path = require('path'); 
+const path = require('path');
 
 const app = express();
 const port = 3000;
@@ -42,6 +42,17 @@ app.use('/api', invoiceRoutes);
 app.use('/api', paymentModeRoute);
 app.use('/api', employeeRoutes);
 app.use('/api', settingRoutes)
+
+// Schedule the function to run on the 1st day of each month
+const { assignLostQuotesToSalesEmployees } = require('./app/scheduler/lostQuote'); // Import the function
+const schedule = require('node-schedule');
+const monthlySchedule = '0 0 1 * *';
+// const minuteSchedule = '* * * * *'; // Run every minute
+schedule.scheduleJob(monthlySchedule, () => {
+  assignLostQuotesToSalesEmployees();
+  console.log('Scheduled task executed at:', new Date());
+});
+// assignLostQuotesToSalesEmployees()
 
 // Error handler
 app.use(errorHandler);

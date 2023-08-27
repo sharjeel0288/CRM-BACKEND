@@ -128,32 +128,33 @@ class Quote {
                 ORDER BY quote_current_date DESC;
             `;
             const [quotes, fields] = await connection.query(selectQuery, [is_approved_status]);
-    
+
             const QuotesWithDetails = [];
-    
+
             for (const quote of quotes) {
                 const quoteId = quote.id;
                 const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
-    
+
                 const totalAmount = quoteItems.reduce((total, item) => total + parseFloat(item.item_total), 0);
-    
+
                 const QouteDetails = {
                     ...quote,
                     total_amount: totalAmount,
                     quote_items: quoteItems
                 };
-    
+
                 QuotesWithDetails.push(QouteDetails);
             }
-    
+
             return QuotesWithDetails;
         } catch (error) {
             console.error('Get all quotes error:', error);
             throw error;
         }
     }
-    
+
     static async getQuoteById(quoteId) {
+        console.log('qqqqqqqqqqqqqqqqqqqq',quoteId)
         const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
         const approvedList = ["NO", "PENDING ", "YES", "REJECTED"]
         try {
@@ -217,6 +218,7 @@ class Quote {
             const QouteDetails = {
                 ...quote, // Use invoice object instead of quotes object
                 total_amount: totalAmount,
+                quoteItems:quoteItems,
                 SubTotal: SubTotal,
                 tax: tax,
                 employee_name: addedByInfo.employee_name,
@@ -301,7 +303,7 @@ class Quote {
                 payment_terms: updatedQuoteData.payment_terms || existingQuoteData.payment_terms,
                 execution_time: updatedQuoteData.execution_time || existingQuoteData.execution_time,
                 bank_details: updatedQuoteData.bank_details || existingQuoteData.bank_details,
-                added_by_employee: existingQuoteData.added_by_employee,
+                added_by_employee: updatedQuoteData.added_by_employee || existingQuoteData.added_by_employee ,
                 is_approved_by_admin: isApproved
                 // payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };

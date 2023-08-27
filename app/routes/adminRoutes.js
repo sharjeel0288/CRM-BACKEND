@@ -28,7 +28,8 @@ router.get('/admin/quotes-and-items-by-employee/:employeeId', adminController.ge
 
 // Get all invoices and invoice items by employee ID
 router.get('/admin/invoices-and-items-by-employee/:employeeId', adminController.getAllInvoicesAndItemsByEmployeeId);
-
+router.get('/admin/get-all-lostQuotes', adminController.getAllLostQuotes);
+router.delete('/admin/lost-quotes/:lostQuoteId', adminController.deleteLostQuote);
 
 module.exports = router;
 

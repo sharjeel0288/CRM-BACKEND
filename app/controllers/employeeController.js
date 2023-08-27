@@ -46,7 +46,34 @@ const changeAnnouncementStatus = async (req, res) => {
     }
 };
 
+const getLostQuotesByEmployee = async (req, res) => {
+    try {
+        const { id: employeeId } = req.user; // Extract employee's ID from req.user
+        // const employeeId= 1000001
+        const lostQuotes = await Employee.getLostQuotesByEmployeeId(employeeId);
 
+        res.status(200).json({ success: true, lostQuotes });
+    } catch (error) {
+        console.error('Get lost quotes by employee error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get lost quotes', error: error.message });
+    }
+};
+const markAsDone = async (req, res) => {
+    const { lostQuoteId } = req.params;
+    const { message } = req.body;
+
+    try {
+        const result = await Employee.markAsDone(lostQuoteId, message);
+        if (result) {
+            return res.status(200).json({ success: true, message: 'Lost quote marked as done successfully.' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Lost quote not found.' });
+        }
+    } catch (error) {
+        console.error('Mark lost quote as done controller error:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+}
 // Get quotes or invoices based on the department of the employee
 const getDocumentsByDepartment = async (req, res) => {
     try {
@@ -74,4 +101,6 @@ module.exports = {
     getAnnouncementsByEmployeeEmail,
     changeAnnouncementStatus,
     getDocumentsByDepartment,
+    getLostQuotesByEmployee,
+    markAsDone,
 };

@@ -193,7 +193,17 @@ const getAnnouncementById = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to get announcement', error: error.message });
     }
 };
+const getAllLostQuotes= async (req, res) => {
+    try {
+        // const employeeId= 1000001
+        const lostQuotes = await Admin.getAllLostQuotes();
 
+        res.status(200).json({ success: true, lostQuotes });
+    } catch (error) {
+        console.error('Get lost quotes by admin error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get lost quotes', error: error.message });
+    }
+};
 const getAllQuotesByEmployeeId = async (req, res) => {
     const { employeeId } = req.params;
 
@@ -217,7 +227,21 @@ const getAllInvoicesAndItemsByEmployeeId = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to get invoices and items', error: error.message });
     }
 };
+const deleteLostQuote = async(req, res) =>{
+    const { lostQuoteId } = req.params;
 
+    try {
+        const result = await Admin.deleteLostQuoteById(lostQuoteId);
+        if (result) {
+            return res.status(200).json({ success: true, message: 'Lost quote deleted successfully.' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Lost quote not found.' });
+        }
+    } catch (error) {
+        console.error('Delete lost quote controller error:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+}
 module.exports = {
     adminSignup,
     createEmployee,
@@ -231,4 +255,6 @@ module.exports = {
     getAnnouncementById,
     getAllQuotesByEmployeeId,
     getAllInvoicesAndItemsByEmployeeId,
+    getAllLostQuotes,
+    deleteLostQuote,
 };
