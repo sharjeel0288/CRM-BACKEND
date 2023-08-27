@@ -34,7 +34,11 @@ class Quote {
                 throw new Error('Admin or employee not found.');
             }
 
-
+            let isApproved = 0
+            if (quoteData.status === 3) {
+                isApproved = 1
+            }
+            else isApproved = 0
             // Generate a unique quote number
             const uniqueQuoteNumber = generateUniqueQuoteNumber();
 
@@ -51,6 +55,7 @@ class Quote {
                 payment_terms: quoteData.payment_terms,
                 execution_time: quoteData.execution_time,
                 bank_details: quoteData.bank_details,
+                is_approved_by_admin: isApproved
                 // payment_mode_id: paymentModeId,
             };
             const [quoteInsertResult, ___] = await connection.query(insertQuoteQuery, quoteDataToInsert);
@@ -113,9 +118,44 @@ class Quote {
             throw error;
         }
     }
-
+    static async getAllQuotesWithStatusOfAdmin(is_approved_status) {
+        try {
+            const selectQuery = `
+                SELECT q.*, c.email AS client_email
+                FROM quote q
+                JOIN client c ON q.client_id = c.id
+                WHERE q.is_approved_by_admin = ?
+                ORDER BY quote_current_date DESC;
+            `;
+            const [quotes, fields] = await connection.query(selectQuery, [is_approved_status]);
+    
+            const QuotesWithDetails = [];
+    
+            for (const quote of quotes) {
+                const quoteId = quote.id;
+                const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
+    
+                const totalAmount = quoteItems.reduce((total, item) => total + parseFloat(item.item_total), 0);
+    
+                const QouteDetails = {
+                    ...quote,
+                    total_amount: totalAmount,
+                    quote_items: quoteItems
+                };
+    
+                QuotesWithDetails.push(QouteDetails);
+            }
+    
+            return QuotesWithDetails;
+        } catch (error) {
+            console.error('Get all quotes error:', error);
+            throw error;
+        }
+    }
+    
     static async getQuoteById(quoteId) {
         const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
+        const approvedList = ["NO", "PENDING ", "YES", "REJECTED"]
         try {
             const selectQuery = `
                 SELECT q.*, c.email AS client_email,
@@ -166,6 +206,8 @@ class Quote {
             const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
 
             quote.status = statusList[quote.status - 1];
+            quote.is_approved_by_admin = approvedList[quote.is_approved_by_admin]
+            console.log(quote.is_approved_by_admin)
 
             // Calculate total amount from InvoiceItemsData
             const totalAmount = quoteItems.reduce((total, item) => total + parseFloat(item.item_total || 0), 0);
@@ -179,7 +221,8 @@ class Quote {
                 tax: tax,
                 employee_name: addedByInfo.employee_name,
                 employee_surname: addedByInfo.employee_surname, // Using lname field for admin's name
-                employee_email: addedByInfo.email
+                employee_email: addedByInfo.email,
+                // is_approved_by_admin:quote.is_approved_by_admin
             };
 
             return QouteDetails;
@@ -189,7 +232,22 @@ class Quote {
         }
     }
 
+    static async updateApprovalStatus(quoteId, isApprovedByAdmin) {
+        try {
+            // Validate the input value
+            if (![2, 3].includes(isApprovedByAdmin)) {
+                throw new Error('Invalid value for is_approved_by_admin');
+            }
 
+            const updateApprovalQuery = 'UPDATE quote SET is_approved_by_admin = ? WHERE id = ?';
+            await connection.query(updateApprovalQuery, [isApprovedByAdmin, quoteId]);
+
+            return { success: true, message: 'Approval status updated successfully' };
+        } catch (error) {
+            console.error('Update approval status error:', error);
+            throw { success: false, message: 'Failed to update approval status', error: error.message };
+        }
+    }
     static async getQuoteItemsByQuoteId(quoteId) {
         try {
             const selectQuery = 'SELECT * FROM quote_item WHERE quote_id = ?';
@@ -222,11 +280,17 @@ class Quote {
 
     static async updateQuoteData(quoteId, updatedQuoteData) {
         try {
+
             // Fetch the existing quote data
             const selectExistingQuoteQuery = 'SELECT * FROM quote WHERE id = ?';
             const [existingQuoteRows, _] = await connection.query(selectExistingQuoteQuery, [quoteId]);
             const existingQuoteData = existingQuoteRows[0];
 
+            let isApproved = 0
+            if (existingQuoteData.status === 3) {
+                isApproved = 1
+            }
+            else isApproved = 0
             // If provided, update the values; otherwise, keep the existing values
             const newQuoteData = {
                 status: (updatedQuoteData.status && updatedQuoteData.status >= 1 && updatedQuoteData.status <= 7)
@@ -238,6 +302,7 @@ class Quote {
                 execution_time: updatedQuoteData.execution_time || existingQuoteData.execution_time,
                 bank_details: updatedQuoteData.bank_details || existingQuoteData.bank_details,
                 added_by_employee: existingQuoteData.added_by_employee,
+                is_approved_by_admin: isApproved
                 // payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
 

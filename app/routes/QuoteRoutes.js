@@ -13,6 +13,8 @@ router.get('/quote/all', quoteController.getAllQuotes);
 router.get('/quote/:id',authMiddleware.authAdminSales, quoteController.getQuoteById);
 router.put('/quote/:id/edit',authMiddleware.authAdminSales, quoteController.editQuoteData); 
 router.delete('/quote/:id/delete', authMiddleware.authAdminSales,quoteController.deleteQuote); 
+router.patch('/quotes/:quoteId/approval', quoteController.updateApprovalStatus);
+router.get('/quote/:status/adminStatus', quoteController.getAllQuotesWithAdminStatus);
 
 router.use(quoteItemRoutes);
 

@@ -22,6 +22,7 @@ const pool = mysql.createPool({
     await connection.query('CREATE DATABASE IF NOT EXISTS ??', [dbConfig.database]);
     await connection.query('USE ??', [dbConfig.database]);
     // ENUM('Draft', 'Pending', 'Sent', 'Expired', 'Declined', 'Accepted', 'Lost'),
+    // NO , pending , accepted, rejected
     // Create the necessary tables if they do not exist
     const createTablesQuery = `
 
@@ -102,6 +103,7 @@ const pool = mysql.createPool({
         added_by_employee INT, -- Employee ID who added the quote
         expiry_date DATE,
         terms_and_condition TEXT,
+        is_approved_by_admin INT DEFAULT 0,
         note TEXT,
         payment_terms TEXT,
         execution_time VARCHAR(255),

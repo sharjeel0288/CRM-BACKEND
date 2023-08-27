@@ -13,6 +13,18 @@ const createQuote = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to create quote', error: error.message });
     }
 };
+const updateApprovalStatus = async (req, res) => {
+    try {
+        const { quoteId } = req.params;
+        const { is_approved_by_admin } = req.body;
+
+        const result = await Quote.updateApprovalStatus(quoteId, is_approved_by_admin);
+
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'An error occurred', error: error.message });
+    }
+}
 const getAllQuotes = async (req, res) => {
     try {
         const quotes = await Quote.getAllQuotes();
@@ -32,6 +44,18 @@ const getAllQuotes = async (req, res) => {
     } catch (error) {
         console.error('Get all Quote error:', error);
         res.status(500).json({ success: false, message: 'Failed to get Quote', error: error.message });
+    }
+};
+const getAllQuotesWithAdminStatus = async (req, res) => {
+    try {
+        const isApprovedStatus = req.params.status; // Read the query parameter
+console.log(isApprovedStatus)
+        const quotesWithDetails = await Quote.getAllQuotesWithStatusOfAdmin(isApprovedStatus);
+
+        res.status(200).json({ success: true, quotes: quotesWithDetails });
+    } catch (error) {
+        console.error('Get all quotes error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get quotes', error: error.message });
     }
 };
 
@@ -109,4 +133,6 @@ module.exports = {
     getQuoteById,
     editQuoteData,
     deleteQuote,
+    updateApprovalStatus,
+    getAllQuotesWithAdminStatus,
 };
