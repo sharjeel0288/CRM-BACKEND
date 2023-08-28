@@ -8,6 +8,12 @@ const addOrUpdateLogo = async (req, res) => {
     const logoImg = req.file ? req.file.filename : null;
 
     try {
+        if (!logoImg) {
+            // If logoImg is empty or null, return an error response
+            console.log("img not provided")
+            return res.status(400).json({ success: false, message: 'Logo image is empty or not provided' });
+        }
+
         if (existingLogoRows.length > 0) {
             // Update the existing logo image
             const updateQuery = 'UPDATE setting SET logo_img = ? WHERE id = ?';
@@ -24,6 +30,7 @@ const addOrUpdateLogo = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to add or update logo image', error: error.message });
     }
 };
+
 
 
 
