@@ -30,6 +30,7 @@ class Employee {
             return {
                 id: user.id,
                 email: user.email,
+                name:user.name+' '+user.surname,
                 department: user.department,
                 authToken: jwtUtils.generateToken({ id: user.id, email: user.email, department: user.department }),
             };

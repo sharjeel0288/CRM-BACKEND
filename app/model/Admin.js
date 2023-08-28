@@ -63,6 +63,7 @@ class Admin {
                 id: user.id,
                 email: user.email,
                 department: 'admin',
+                name:user.fname+' '+user.lname,
                 authToken: jwtUtils.generateToken({ id: user.id, email: user.email, department: 'admin' }),
             };
         } catch (error) {
