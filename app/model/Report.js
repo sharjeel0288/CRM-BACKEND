@@ -275,7 +275,9 @@ class Report {
                 LIMIT 5;
             `;
             const [quotes, _] = await connection.query(query, [id]);
-
+            if (quotes.total_amount === null) {
+                quotes.total_amount = 0
+            }
             const recentQuotesWithEmployeeInfo = [];
 
             for (const quote of quotes) {
