@@ -240,6 +240,7 @@ class Admin {
     }
     static async getAllLostQuotes() {
         try {
+
             const selectQuery = 'SELECT * FROM lost_quote';
             const [lostQuotes, _] = await connection.query(selectQuery);
 
