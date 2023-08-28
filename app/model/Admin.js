@@ -43,6 +43,11 @@ class Admin {
         const [admins, _] = await connection.query(query, [email]);
         return admins[0];
     }
+    static async getAdminById(id) {
+        const query = 'SELECT * FROM admin WHERE email = ?';
+        const [admins, _] = await connection.query(query, [id]);
+        return admins[0];
+    }
     static async login(email, password) {
         try {
             const query = 'SELECT * FROM admin WHERE email = ?';
@@ -63,7 +68,7 @@ class Admin {
                 id: user.id,
                 email: user.email,
                 department: 'admin',
-                name:user.fname+' '+user.lname,
+                name: user.fname + ' ' + user.lname,
                 authToken: jwtUtils.generateToken({ id: user.id, email: user.email, department: 'admin' }),
             };
         } catch (error) {
@@ -237,33 +242,33 @@ class Admin {
         try {
             const selectQuery = 'SELECT * FROM lost_quote';
             const [lostQuotes, _] = await connection.query(selectQuery);
-    
+
             // Fetch employee data for each lost quote
             const lostQuotesWithEmployeeInfo = await Promise.all(lostQuotes.map(async (lostQuote) => {
                 const employeeId = lostQuote.assigned_to_employee;
                 const [employeeData] = await connection.query('SELECT * FROM employee WHERE id = ?', [employeeId]);
-                
+
                 // Combine employee's first name and last name
                 const employeeName = `${employeeData[0].name} ${employeeData[0].surname}`;
-                
+
                 return { ...lostQuote, assigned_to_employee: employeeName };
             }));
-    
+
             // Fetch quote details for each lost quote
             const lostQuotesWithQuoteInfo = await Promise.all(lostQuotesWithEmployeeInfo.map(async (lostQuote) => {
                 const quoteId = lostQuote.quote_id;
                 const quoteDetails = await Quote.getQuoteById(quoteId);
-                
+
                 return { ...lostQuote, quoteDetails };
             }));
-    
+
             return lostQuotesWithQuoteInfo;
         } catch (error) {
             console.error('Get lost quotes by admin error:', error);
             throw error;
         }
     }
-    
+
     static async deleteLostQuoteById(lostQuoteId) {
         try {
             const deleteQuery = 'DELETE FROM lost_quote WHERE id = ?';

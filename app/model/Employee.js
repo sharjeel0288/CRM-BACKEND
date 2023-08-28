@@ -10,6 +10,12 @@ class Employee {
         const [employees, _] = await connection.query(query, [email]);
         return employees[0];
     }
+    static async getEmployeeById(employeeId) {
+        // Implement your logic to fetch an employee by ID from the database
+        const query = 'SELECT * FROM employee WHERE id = ?';
+        const [rows] = await db.query(query, [employeeId]);
+        return rows[0];
+      }
     static async login(email, password) {
         try {
             const query = 'SELECT * FROM employee WHERE email = ?';
@@ -30,7 +36,7 @@ class Employee {
             return {
                 id: user.id,
                 email: user.email,
-                name:user.name+' '+user.surname,
+                name: user.name + ' ' + user.surname,
                 department: user.department,
                 authToken: jwtUtils.generateToken({ id: user.id, email: user.email, department: user.department }),
             };

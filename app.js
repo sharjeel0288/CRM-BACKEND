@@ -14,6 +14,7 @@ const employeeRoutes = require('./app/routes/employeeRoutes');
 const settingRoutes = require('./app/routes/SettingRoutes');
 const bodyParser = require('body-parser');
 const reportRoutes = require('./app/routes/reportRoutes');
+const sendPdf = require('./app/routes/pdfEmail')
 const path = require('path');
 
 const app = express();
@@ -42,6 +43,7 @@ app.use('/api', invoiceRoutes);
 app.use('/api', paymentModeRoute);
 app.use('/api', employeeRoutes);
 app.use('/api', settingRoutes)
+app.use('/api', sendPdf)
 
 // Schedule the function to run on the 1st day of each month
 const { assignLostQuotesToSalesEmployees } = require('./app/scheduler/lostQuote'); // Import the function

@@ -8,7 +8,9 @@ const Invoice = require('../model/Invoice')
 const Setting = require('../model/Setting')
 const Employee = require('../model/Employee');
 const PaymentMode = require('../model/PaymentMode');
-
+const Admin = require('../model/Admin');
+const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
 
 
 const GetQuotePdfDetails = async (req, res) => {
@@ -124,7 +126,74 @@ const GetInvoicePdfDetails = async (req, res) => {
         res.status(500).json({ success: false, message: 'An error occurred while generating PDF', error: error.message });
     }
 };
+
+
+const sendPdfByEmail = async (req, res) => {
+    try {
+        const id = req.body.employeeId;
+        const clientId = req.body.clientId
+        const userPassword = req.body.employeePassword
+        const employee = await Employee.getEmployeeById(id);
+        const admin = await Admin.getAdminById(id);
+        const client = await Client.getClientById(clientId)
+
+
+        if (!employee && !admin) {
+            throw new Error('User not found');
+        }
+        if (!client) {
+            throw new Error("Client not found")
+        }
+        
+
+        const user = employee || admin;
+        console.log("user", user)
+        console.log("client", client)
+        const isPasswordValid = await bcrypt.compare(userPassword, user.password); // Compare passwords
+        console.log('isPasswordValid: ', isPasswordValid)
+        if (!isPasswordValid) {
+            throw new Error('Incorrect password.');
+        }
+
+        
+        const mailOptions = {
+            from: user.email, // Use the fetched user's email as the sender
+            to: client.email,
+            subject: 'PDF Attachment',
+            text: 'PDF file attached.',
+            attachments: [
+                {
+                    filename: req.file.originalname,
+                    content: req.file.buffer,
+                },
+            ],
+        };
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail', // Replace with your email service
+            auth: {
+                user: user.email, // Use the fetched user's email as the sender
+                pass: userPassword, // Use the fetched user's password as the password
+            },
+        });
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Email sending error:', error);
+                res.status(500).json({ success: false, message: 'An error occurred while sending email', error: error.message });
+            } else {
+                console.log('Email sent:', info.response);
+                res.status(200).json({ success: true, message: 'Email sent successfully' });
+            }
+        });
+    } catch (error) {
+        console.error('Controller error:', error);
+        res.status(500).json({ success: false, message: 'An error occurred', error: error.message });
+    }
+};
+
+
 module.exports = {
     GetQuotePdfDetails,
     GetInvoicePdfDetails,
+    sendPdfByEmail
 };
