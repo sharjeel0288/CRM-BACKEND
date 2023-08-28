@@ -234,21 +234,35 @@ class Admin {
     }
     static async getAllLostQuotes() {
         try {
-            const selectQuery = 'SELECT * FROM lost_quote ';
+            const selectQuery = 'SELECT * FROM lost_quote';
             const [lostQuotes, _] = await connection.query(selectQuery);
-
-            const lostQuotesWithQuoteInfo = await Promise.all(lostQuotes.map(async (lostQuote) => {
+    
+            // Fetch employee data for each lost quote
+            const lostQuotesWithEmployeeInfo = await Promise.all(lostQuotes.map(async (lostQuote) => {
+                const employeeId = lostQuote.assigned_to_employee;
+                const [employeeData] = await connection.query('SELECT * FROM employee WHERE id = ?', [employeeId]);
+                
+                // Combine employee's first name and last name
+                const employeeName = `${employeeData[0].name} ${employeeData[0].surname}`;
+                
+                return { ...lostQuote, assigned_to_employee: employeeName };
+            }));
+    
+            // Fetch quote details for each lost quote
+            const lostQuotesWithQuoteInfo = await Promise.all(lostQuotesWithEmployeeInfo.map(async (lostQuote) => {
                 const quoteId = lostQuote.quote_id;
                 const quoteDetails = await Quote.getQuoteById(quoteId);
+                
                 return { ...lostQuote, quoteDetails };
             }));
-
+    
             return lostQuotesWithQuoteInfo;
         } catch (error) {
-            console.error('Get lost quotes by admin  error:', error);
+            console.error('Get lost quotes by admin error:', error);
             throw error;
         }
     }
+    
     static async deleteLostQuoteById(lostQuoteId) {
         try {
             const deleteQuery = 'DELETE FROM lost_quote WHERE id = ?';

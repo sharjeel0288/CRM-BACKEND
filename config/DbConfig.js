@@ -183,7 +183,8 @@ const pool = mysql.createPool({
         assigned_to_employee INT, -- Employee ID assigned to this lost quote/invoice
         message TEXT,
         isDone INT default 0,
-        FOREIGN KEY (quote_id) REFERENCES quote(id),
+        FOREIGN KEY (quote_id) REFERENCES quote(id) ON DELETE CASCADE,
+        -- ON DELETE CASCADE specifies cascading delete
         FOREIGN KEY (assigned_to_employee) REFERENCES employee(id)
     );
       `;
