@@ -122,11 +122,16 @@ class Admin {
             }
 
             // Hash the updated employee's password before storing it
-            if (updatedEmployeeData.password) {
-                const hashedPassword = await bcrypt.hash(updatedEmployeeData.password, 10);
-                updatedEmployeeData.password = hashedPassword;
+            if (updatedEmployeeData.password) { // Check if the password is provided and not null
+                if (updatedEmployeeData.password !== null) {
+                    // Hash the updated password
+                    const hashedPassword = await bcrypt.hash(updatedEmployeeData.password, 10);
+                    updatedEmployeeData.password = hashedPassword;
+                } else {
+                    // If password is null, remove it from the updatedEmployeeData
+                    delete updatedEmployeeData.password;
+                }
             }
-
             // Update the employee's information
             const updateQuery = 'UPDATE employee SET ? WHERE id = ?';
             const [result, fields] = await connection.query(updateQuery, [updatedEmployeeData, employeeId]);

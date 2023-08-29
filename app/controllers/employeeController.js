@@ -9,6 +9,23 @@ const getAnnouncementsByEmployeeEmail = async (req, res) => {
         const { email } = req.user; // Extract employee's email from req.user
         const query = 'SELECT * FROM announcement WHERE employee_id = (SELECT id FROM employee WHERE email = ?) AND status = 0';
         const [announcements, _] = await connection.query(query, [email]);
+        // Map priority values to corresponding strings
+        announcements.forEach(announcement => {
+            switch (announcement.priority) {
+                case 1:
+                    announcement.priority = "LOW";
+                    break;
+                case 2:
+                    announcement.priority = 'MEDIUM';
+                    break;
+                case 3:
+                    announcement.priority = 'HIGH';
+                    break;
+                default:
+                    announcement.priority = '--';
+            }
+        });
+        console.log(announcements)
         res.status(200).json({ success: true, announcements });
     } catch (error) {
         console.error('Get announcements by employee email error:', error);

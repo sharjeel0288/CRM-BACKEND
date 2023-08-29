@@ -185,7 +185,7 @@ const pool = mysql.createPool({
         isDone INT default 0,
         FOREIGN KEY (quote_id) REFERENCES quote(id) ON DELETE CASCADE,
         -- ON DELETE CASCADE specifies cascading delete
-        FOREIGN KEY (assigned_to_employee) REFERENCES employee(id)
+        FOREIGN KEY (assigned_to_employee) REFERENCES employee(id) ON DELETE CASCADE
     );
       `;
 
