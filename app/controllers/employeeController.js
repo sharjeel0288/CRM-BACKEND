@@ -1,7 +1,6 @@
 const Employee = require('../model/Employee');
 const connection = require('../../config/DbConfig');
 
-// ... Other functions ...
 
 // Get announcements by employee email
 const getAnnouncementsByEmployeeEmail = async (req, res) => {
