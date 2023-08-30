@@ -11,7 +11,21 @@ const PaymentMode = require('../model/PaymentMode');
 const Admin = require('../model/Admin');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const connection = require('../../config/DbConfig');
 
+
+const getEmployeeOrAdminById = async (id) => {
+    const employeeQuery = 'SELECT * FROM employee WHERE id = ?';
+    const [employeeRows] = await connection.query(employeeQuery, [id]);
+
+    if (employeeRows.length > 0) {
+        return employeeRows[0];
+    } else {
+        const adminQuery = 'SELECT * FROM admin WHERE email = ?';
+        const [adminRows] = await connection.query(adminQuery, [id]);
+        return adminRows[0];
+    }
+}
 
 const GetQuotePdfDetails = async (req, res) => {
     try {
@@ -30,7 +44,7 @@ const GetQuotePdfDetails = async (req, res) => {
         const client = await Client.getClientById(quoteData.client_id);
 
         // Fetch employee data based on the employee ID in quoteData
-        const employee = await Employee.getEmployeeById(quoteData.added_by_employee);
+        const employee = await getEmployeeOrAdminById(quoteData.added_by_employee);
 
         // List of possible status values
         const statusList = ['Draft', 'Pending', 'Sent', 'Expired', 'Declined', 'Accepted', 'Lost'];
@@ -85,7 +99,7 @@ const GetInvoicePdfDetails = async (req, res) => {
         const client = await Client.getClientById(invoiceData.client_id);
 
         // Fetch employee data based on the employee ID in quoteData
-        const employee = await Employee.getEmployeeById(invoiceData.added_by_employee);
+        const employee = await getEmployeeOrAdminById(invoiceData.added_by_employee);
 
         // List of possible status values
         const statusList = ['Draft', 'Pending', 'Sent', 'Expired', 'Declined', 'Accepted', 'Lost'];
@@ -144,7 +158,7 @@ const sendPdfByEmail = async (req, res) => {
         if (!client) {
             throw new Error("Client not found")
         }
-        
+
 
         const user = employee || admin;
         console.log("user", user)
@@ -155,7 +169,7 @@ const sendPdfByEmail = async (req, res) => {
             throw new Error('Incorrect password.');
         }
 
-        
+
         const mailOptions = {
             from: user.email, // Use the fetched user's email as the sender
             to: client.email,
