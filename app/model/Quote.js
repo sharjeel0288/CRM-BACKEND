@@ -119,6 +119,8 @@ class Quote {
         }
     }
     static async getAllQuotesWithStatusOfAdmin(is_approved_status) {
+        const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
+        const approvedList = ["NO", "PENDING ", "YES", "REJECTED"]
         try {
             const selectQuery = `
                 SELECT q.*, c.email AS client_email
@@ -132,18 +134,46 @@ class Quote {
             const QuotesWithDetails = [];
 
             for (const quote of quotes) {
+                let employee_name = '';
+                let employee_surname = '';
+                quote.status = statusList[quote.status - 1];
+                quote.is_approved_by_admin = approvedList[quote.is_approved_by_admin]
+                const addedByQuery = `SELECT * FROM employee WHERE id = ?`;
+                const [employee, __] = await connection.query(addedByQuery, [quote.added_by_employee]);
+
+                if (employee.length > 0) {
+                    employee_name = employee[0].name;
+                    employee_surname = employee[0].surname;
+                } else {
+                    const adminQuery = `SELECT * FROM admin WHERE id = ?`;
+                    const [admin, _] = await connection.query(adminQuery, [quote.added_by_employee]);
+
+                    if (admin.length > 0) {
+                        employee_name = '';
+                        employee_surname = 'Admin';
+                    }
+                }
+
+                const clientQuery = `SELECT * FROM client WHERE id = ?`;
+                const [client, ___] = await connection.query(clientQuery, [quote.client_id]);
+
                 const quoteId = quote.id;
                 const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
 
                 const totalAmount = quoteItems.reduce((total, item) => total + parseFloat(item.item_total), 0);
 
-                const QouteDetails = {
+                const QuoteDetails = {
                     ...quote,
+                    employee_name: employee_name,
+                    employee_surname: employee_surname,
+                    client_fname: client[0].fname, // Assuming there's only one client row
+                    client_lname: client[0].lname, // Assuming there's only one client row
+                    client_phone: client[0].phone, // Assuming there's only one client row
                     total_amount: totalAmount,
-                    quote_items: quoteItems
+                    quoteItems: quoteItems
                 };
 
-                QuotesWithDetails.push(QouteDetails);
+                QuotesWithDetails.push(QuoteDetails);
             }
 
             return QuotesWithDetails;
@@ -153,8 +183,10 @@ class Quote {
         }
     }
 
+
+
     static async getQuoteById(quoteId) {
-        console.log('qqqqqqqqqqqqqqqqqqqq',quoteId)
+        console.log('qqqqqqqqqqqqqqqqqqqq', quoteId)
         const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
         const approvedList = ["NO", "PENDING ", "YES", "REJECTED"]
         try {
@@ -218,7 +250,7 @@ class Quote {
             const QouteDetails = {
                 ...quote, // Use invoice object instead of quotes object
                 total_amount: totalAmount,
-                quoteItems:quoteItems,
+                quoteItems: quoteItems,
                 SubTotal: SubTotal,
                 tax: tax,
                 employee_name: addedByInfo.employee_name,
@@ -287,12 +319,12 @@ class Quote {
             const selectExistingQuoteQuery = 'SELECT * FROM quote WHERE id = ?';
             const [existingQuoteRows, _] = await connection.query(selectExistingQuoteQuery, [quoteId]);
             const existingQuoteData = existingQuoteRows[0];
-
-            let isApproved = 0
+            console.log(existingQuoteData.status)
+            let isApproved
             if (existingQuoteData.status === 3) {
                 isApproved = 1
-            }
-            else isApproved = 0
+            } else isApproved = 0
+
             // If provided, update the values; otherwise, keep the existing values
             const newQuoteData = {
                 status: (updatedQuoteData.status && updatedQuoteData.status >= 1 && updatedQuoteData.status <= 7)
@@ -303,8 +335,8 @@ class Quote {
                 payment_terms: updatedQuoteData.payment_terms || existingQuoteData.payment_terms,
                 execution_time: updatedQuoteData.execution_time || existingQuoteData.execution_time,
                 bank_details: updatedQuoteData.bank_details || existingQuoteData.bank_details,
-                added_by_employee: updatedQuoteData.added_by_employee || existingQuoteData.added_by_employee ,
-                is_approved_by_admin: isApproved
+                added_by_employee: updatedQuoteData.added_by_employee || existingQuoteData.added_by_employee,
+                is_approved_by_admin: isApproved || existingQuoteData.added_by_employee
                 // payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
 
