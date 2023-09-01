@@ -61,7 +61,7 @@ const GetQuotePdfDetails = async (req, res) => {
         for (const item of quoteItems) {
             subtotal += item.item_total
         }
-        const vatRate = 0.1; // 10% VAT rate
+        const vatRate = 0.05; // 5% VAT rate
         const tax = subtotal * vatRate;
         const total = subtotal + tax;
         // Placeholder response indicating success
@@ -120,7 +120,7 @@ const GetInvoicePdfDetails = async (req, res) => {
         for (const item of invoiceItems) {
             subtotal += item.item_total
         }
-        const vatRate = 0.1; // 10% VAT rate
+        const vatRate = 0.05; // 5% VAT rate
         const tax = subtotal * vatRate;
         const total = subtotal + tax;
         // Placeholder response indicating success
