@@ -119,7 +119,7 @@ module.exports.authAdminSales = async (req, res, next) => {
       }
     }
     else if(decodedToken.department.toLowerCase() == 'sales'){
-      console.log(decodedToken)
+      // console.log(decodedToken)
       const sales = await Employee.getEmployeeByEmail(decodedToken.email);
       if (!sales) {
         throw new Error('User is not authorized as an Sales.');
@@ -151,7 +151,7 @@ module.exports.authAdminAccounts = async (req, res, next) => {
       }
     }
     else if(decodedToken.department.toLowerCase() == 'accounts'){
-      console.log(decodedToken)
+      // console.log(decodedToken)
       const accounts = await Employee.getEmployeeByEmail(decodedToken.email);
       if (!accounts) {
         throw new Error('User is not authorized as an Accounts.');

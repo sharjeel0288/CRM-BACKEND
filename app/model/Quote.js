@@ -182,9 +182,6 @@ class Quote {
             throw error;
         }
     }
-
-
-
     static async getQuoteById(quoteId) {
         console.log('qqqqqqqqqqqqqqqqqqqq', quoteId)
         const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
@@ -319,9 +316,10 @@ class Quote {
             const selectExistingQuoteQuery = 'SELECT * FROM quote WHERE id = ?';
             const [existingQuoteRows, _] = await connection.query(selectExistingQuoteQuery, [quoteId]);
             const existingQuoteData = existingQuoteRows[0];
-            console.log(existingQuoteData.status)
+            console.log('edit updatedQuoteData.status', updatedQuoteData.status)
             let isApproved
-            if (existingQuoteData.status === 3) {
+            if (updatedQuoteData.status == 3) {
+                console.log("in Iffffff")
                 isApproved = 1
             } else isApproved = 0
 
@@ -336,9 +334,10 @@ class Quote {
                 execution_time: updatedQuoteData.execution_time || existingQuoteData.execution_time,
                 bank_details: updatedQuoteData.bank_details || existingQuoteData.bank_details,
                 added_by_employee: updatedQuoteData.added_by_employee || existingQuoteData.added_by_employee,
-                is_approved_by_admin: isApproved || existingQuoteData.added_by_employee
+                is_approved_by_admin: isApproved
                 // payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
+            console.log(newQuoteData.is_approved_by_admin)
 
             // If client email is provided, update the client_id
             if (updatedQuoteData.client_email) {
@@ -350,8 +349,8 @@ class Quote {
             }
 
             const updateQuoteQuery = 'UPDATE quote SET ? WHERE id = ?';
-            await connection.query(updateQuoteQuery, [newQuoteData, quoteId]);
-
+            const res = await connection.query(updateQuoteQuery, [newQuoteData, quoteId]);
+            // console.log("res", res)
             return { success: true, message: 'Quote data updated successfully' };
         } catch (error) {
             console.error('Update quote data error:', error);
