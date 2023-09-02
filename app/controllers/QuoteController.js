@@ -49,7 +49,7 @@ const getAllQuotes = async (req, res) => {
 const getAllQuotesWithAdminStatus = async (req, res) => {
     try {
         const isApprovedStatus = req.params.status; // Read the query parameter
-console.log(isApprovedStatus)
+        console.log(isApprovedStatus)
         const quotesWithDetails = await Quote.getAllQuotesWithStatusOfAdmin(isApprovedStatus);
 
         res.status(200).json({ success: true, quotes: quotesWithDetails });
