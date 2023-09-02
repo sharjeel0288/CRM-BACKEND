@@ -183,7 +183,9 @@ const sendPdfByEmail = async (req, res) => {
             ],
         };
         const transporter = nodemailer.createTransport({
-            service: 'Gmail', // Replace with your email service
+            host: 'mail.fourseason.ae',
+            port: 465,
+            secure: true, // Replace with your email service
             auth: {
                 user: user.email, // Use the fetched user's email as the sender
                 pass: userPassword, // Use the fetched user's password as the password

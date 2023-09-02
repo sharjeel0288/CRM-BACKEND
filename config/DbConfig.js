@@ -49,6 +49,7 @@ const pool = mysql.createPool({
         id INT PRIMARY KEY AUTO_INCREMENT,
         fname VARCHAR(255),
         lname VARCHAR(255),
+     --   vat VARCHAR(255),
         phone VARCHAR(15),
         email VARCHAR(255),
         date DATE,

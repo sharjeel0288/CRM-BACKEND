@@ -1,7 +1,7 @@
 // app\routes\invoiceRoutes.js
 
 const express = require('express');
-const invoiceController = require('../controllers/invoiceController'); // Corrected import
+const invoiceController = require('../controllers/invoiceController'); 
 const validation = require('../utils/validation');
 const authMiddleware = require('../middleware/authMiddleware');
 const invoiceItemRoutes = require('./invoiceItemRoutes');
