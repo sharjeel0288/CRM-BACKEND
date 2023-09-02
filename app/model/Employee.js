@@ -11,11 +11,22 @@ class Employee {
         return employees[0];
     }
     static async getEmployeeById(employeeId) {
-        // Implement your logic to fetch an employee by ID from the database
-        const query = 'SELECT * FROM employee WHERE id = ?';
-        const [rows] = await db.query(query, [employeeId]);
-        return rows[0];
-      }
+        try {
+            // Implement your logic to fetch an employee by ID from the database
+            const query = 'SELECT * FROM employee WHERE id = ?';
+            const [rows] = await db.query(query, [employeeId]);
+    
+            if (rows.length === 0) {
+                throw new Error(`Employee not found with ID: ${employeeId}`);
+            }
+    
+            return rows[0];
+        } catch (error) {
+            console.error('Error fetching employee:', error);
+            throw error; // Re-throw the error for the caller to handle
+        }
+    }
+    
     static async login(email, password) {
         try {
             const query = 'SELECT * FROM employee WHERE email = ?';

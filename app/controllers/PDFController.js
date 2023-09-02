@@ -19,10 +19,12 @@ const getEmployeeOrAdminById = async (id) => {
     const [employeeRows] = await connection.query(employeeQuery, [id]);
 
     if (employeeRows.length > 0) {
+        console.log('employee found : ', employeeRows[0])
         return employeeRows[0];
     } else {
-        const adminQuery = 'SELECT * FROM admin WHERE email = ?';
+        const adminQuery = 'SELECT * FROM admin WHERE id = ?';
         const [adminRows] = await connection.query(adminQuery, [id]);
+        console.log('admin found : ', adminRows[0])
         return adminRows[0];
     }
 }
@@ -147,12 +149,11 @@ const sendPdfByEmail = async (req, res) => {
         const id = req.body.employeeId;
         const clientId = req.body.clientId
         const userPassword = req.body.employeePassword
-        const employee = await Employee.getEmployeeById(id);
-        const admin = await Admin.getAdminById(id);
+        const user = await getEmployeeOrAdminById(id)
         const client = await Client.getClientById(clientId)
 
 
-        if (!employee && !admin) {
+        if (!user) {
             throw new Error('User not found');
         }
         if (!client) {
@@ -160,7 +161,6 @@ const sendPdfByEmail = async (req, res) => {
         }
 
 
-        const user = employee || admin;
         console.log("user", user)
         console.log("client", client)
         const isPasswordValid = await bcrypt.compare(userPassword, user.password); // Compare passwords

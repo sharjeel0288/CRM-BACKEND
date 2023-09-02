@@ -132,7 +132,7 @@ class Invoice {
 
         try {
             const selectQuery = `
-                SELECT q.*, c.email AS client_email,
+                SELECT q.*, c.email AS client_email,c.id as client_id,
                 c.fname AS client_fname, c.lname AS client_lname,
                 c.phone as client_phone
                 FROM invoice q

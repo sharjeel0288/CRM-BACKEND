@@ -43,11 +43,28 @@ class Admin {
         const [admins, _] = await connection.query(query, [email]);
         return admins[0];
     }
+    // static async getAdminById(id) {
+    //     const query = 'SELECT * FROM admin WHERE email = ?';
+    //     const [admins, _] = await connection.query(query, [id]);
+    //     return admins[0];
+    // }
     static async getAdminById(id) {
-        const query = 'SELECT * FROM admin WHERE email = ?';
-        const [admins, _] = await connection.query(query, [id]);
-        return admins[0];
+        try {
+            // Implement your logic to fetch an employee by ID from the database
+            const query = 'SELECT * FROM admin WHERE id = ?';
+            const [admin] = await db.query(query, [id]);
+    
+            if (admin.length === 0) {
+                throw new Error(`admin not found with ID: ${id}`);
+            }
+    
+            return admin[0];
+        } catch (error) {
+            console.error('Error fetching admin:', error);
+            throw error; // Re-throw the error for the caller to handle
+        }
     }
+    
     static async login(email, password) {
         try {
             const query = 'SELECT * FROM admin WHERE email = ?';
