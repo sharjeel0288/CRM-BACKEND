@@ -26,7 +26,6 @@ const pool = mysql.createPool({
     // Create the necessary tables if they do not exist
     const createTablesQuery = `
 
-      CREATE DATABASE IF NOT EXISTS CRM;
       
       CREATE TABLE IF NOT EXISTS admin (
         id INT PRIMARY KEY AUTO_INCREMENT,    
