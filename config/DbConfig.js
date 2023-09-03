@@ -9,6 +9,7 @@ const dbConfig = {
   port: "3308",
 };
 
+
 // Create a promise-based pool for MySQL connections
 const pool = mysql.createPool({
   ...dbConfig,
