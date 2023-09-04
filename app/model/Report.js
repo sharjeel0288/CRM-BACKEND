@@ -332,6 +332,7 @@ class Report {
                 ORDER BY i.invoice_current_date DESC
                 LIMIT ?;
             `;
+            
             const [invoices, _] = await connection.query(query, [limit]);
             return invoices;
         } catch (error) {
