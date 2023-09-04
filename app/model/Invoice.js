@@ -44,7 +44,7 @@ class Invoice {
             const invoiceDataToInsert = {
                 client_id: clientId,
                 number: uniqueInvoiceNumber,
-                invoice_date: new Date(),
+                // invoice_date: new Date(),
                 invoice_current_date: new Date(),
                 status: invoiceData.status,
                 added_by_employee: addedByEmployeeId || addedByAdminId,
@@ -54,7 +54,7 @@ class Invoice {
                 execution_time: invoiceData.execution_time,
                 bank_details: invoiceData.bank_details,
                 isPerforma: invoiceData.isPerforma,
-                payment_mode_id: invoiceData.paymentModeId,
+                // payment_mode_id: invoiceData.paymentModeId,
 
             };
             const [invoiceInsertResult, ___] = await connection.query(insertInvoiceQuery, invoiceDataToInsert);
@@ -91,7 +91,7 @@ class Invoice {
                 SELECT q.*, c.email AS client_email
                 FROM invoice q
                 JOIN client c ON q.client_id = c.id
-                ORDER BY invoice_date DESC
+                ORDER BY invoice_current_date DESC
             `;
             const [invoices, fields] = await connection.query(selectQuery);
 

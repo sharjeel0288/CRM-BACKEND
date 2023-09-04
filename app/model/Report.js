@@ -322,7 +322,7 @@ class Report {
         try {
             const query = `
                 SELECT CONCAT(c.fname, ' ', c.lname) AS client_name,
-                       i.invoice_current_date AS invoice_date, i.status,
+                       i.invoice_current_date AS invoice_current_date, i.status,
                        i.terms_and_condition, i.payment_terms,
                        SUM(ii.item_total) AS total_amount
                 FROM invoice i
