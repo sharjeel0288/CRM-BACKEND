@@ -148,6 +148,7 @@ const pool = mysql.createPool({
 
       
       CREATE TABLE IF NOT EXISTS setting (
+        id INT PRIMARY KEY AUTO_INCREMENT,
         logo_img VARCHAR(255),
         stamp_img VARCHAR(255),
         name VARCHAR(255),
