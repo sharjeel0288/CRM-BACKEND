@@ -7,5 +7,6 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.post('/send-pdf', upload.single('pdfFile'), pdfController.sendPdfByEmail);
+router.post('/send-regret', pdfController.sendRegretEmail);
 
 module.exports = router;

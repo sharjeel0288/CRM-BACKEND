@@ -207,9 +207,61 @@ const sendPdfByEmail = async (req, res) => {
     }
 };
 
+const sendRegretEmail = async (req, res) => {
+    try {
+        const { employeeId, subject, clientId, description, employeePassword } = req.body;
+
+        // Fetch user and client asynchronously
+        const [user, client] = await Promise.all([
+            getEmployeeOrAdminById(employeeId),
+            Client.getClientById(clientId)
+        ]);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+        if (!client) {
+            throw new Error('Client not found');
+        }
+
+        const isPasswordValid = await bcrypt.compare(employeePassword, user.password);
+
+        if (!isPasswordValid) {
+            throw new Error('Incorrect password.');
+        }
+
+        const mailOptions = {
+            from: user.email,
+            to: client.email,
+            subject: subject,
+            text: description, // Use 'text' for plain text email content
+        };
+
+        const transporter = nodemailer.createTransport({
+            host: 'mail.fourseason.ae',
+            port: 465,
+            secure: true,
+            auth: {
+                user: user.email,
+                pass: employeePassword,
+            },
+        });
+
+        // Use async/await to send the email
+        const info = await transporter.sendMail(mailOptions);
+
+        console.log('Email sent:', info.response);
+        res.status(200).json({ success: true, message: 'Email sent successfully' });
+    } catch (error) {
+        console.error('Controller error:', error);
+        res.status(500).json({ success: false, message: 'An error occurred', error: error.message });
+    }
+};
+
 
 module.exports = {
     GetQuotePdfDetails,
     GetInvoicePdfDetails,
-    sendPdfByEmail
+    sendPdfByEmail,
+    sendRegretEmail,
 };
