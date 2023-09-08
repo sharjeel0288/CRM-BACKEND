@@ -111,6 +111,25 @@ const getDocumentsByDepartment = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to get documents', error: error.message });
     }
 };
+const getEmployeeClients = async (req, res) => {
+    try {
+        const { id } = req.user; // Extract employee's id from req.user
+
+        // Call the getEmployeeClient function to fetch clients associated with the employee
+        const employeeClients = await Employee.getEmployeeClient(id);
+
+        // Check if any clients were found
+        if (employeeClients.length === 0) {
+            return res.status(404).json({ success: false, message: 'No clients found for this employee' });
+        }
+
+        // If clients were found, return them in the response
+        return res.status(200).json({ success: true, clients: employeeClients });
+    } catch (error) {
+        console.error('Controller error:', error);
+        return res.status(500).json({ success: false, message: 'An error occurred', error: error.message });
+    }
+};
 
 module.exports = {
     // ... Other functions ...
@@ -119,4 +138,5 @@ module.exports = {
     getDocumentsByDepartment,
     getLostQuotesByEmployee,
     markAsDone,
+    getEmployeeClients,
 };

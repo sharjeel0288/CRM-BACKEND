@@ -9,14 +9,16 @@ const router = express.Router();
 router.get('/employee/announcements', authMiddleware.authenticateEmployee, employeeController.getAnnouncementsByEmployeeEmail);
 
 // Change announcement status
-router.patch('/employee/announcement/:id/status',authMiddleware.authenticateEmployee, employeeController.changeAnnouncementStatus);
+router.patch('/employee/announcement/:id/status', authMiddleware.authenticateEmployee, employeeController.changeAnnouncementStatus);
 
 
 // Get quotes or invoices based on the department of the employee
 router.get('/employee/documents', authMiddleware.authenticateEmployee, employeeController.getDocumentsByDepartment);
+// get client add by employee
+router.get('/employee/clients', authMiddleware.authenticateEmployee, employeeController.getEmployeeClients);
 
 
-router.get('/employee/lost-quotes',authMiddleware.authenticateSalesEmployee, employeeController.getLostQuotesByEmployee);
+router.get('/employee/lost-quotes', authMiddleware.authenticateSalesEmployee, employeeController.getLostQuotesByEmployee);
 router.put('/employee/lost-quotes/:lostQuoteId/mark-as-done', employeeController.markAsDone);
 
 

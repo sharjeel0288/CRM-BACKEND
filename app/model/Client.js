@@ -1,32 +1,47 @@
 const connection = require('../../config/DbConfig');
 const Employee = require('./Employee');
 // const Employee = require('./Employee');
+
+const getEmployeeOrAdminById = async (id) => {
+  const employeeQuery = 'SELECT name as fname, surname as lname FROM employee WHERE id = ?';
+  const [employeeRows] = await connection.query(employeeQuery, [id]);
+  if (employeeRows.length > 0) {
+    console.log('employee found : ', employeeRows[0])
+    return employeeRows[0];
+  } else {
+    const adminQuery = 'SELECT * FROM admin WHERE id = ?';
+    const [adminRows] = await connection.query(adminQuery, [id]);
+    console.log('admin found : ', adminRows[0])
+    return adminRows[0];
+  }
+}
+
 class Client {
   static async getAllClients() {
     try {
-        const query = 'SELECT * FROM client';
-        const [clients, fields] = await connection.query(query);
+      const query = 'SELECT * FROM client';
+      const [clients, fields] = await connection.query(query);
 
-        // Iterate through each client to fetch the employee who added the client
-        for (const client of clients) {
-            const getEmployeeQuery = 'SELECT name, surname  FROM employee WHERE id = ?';
-            const [employeeResults, employeeFields] = await connection.query(getEmployeeQuery, [client.added_by_employee]);
+      // Iterate through each client to fetch the employee who added the client
+      for (const client of clients) {
+        const getEmployeeQuery = 'SELECT name, surname  FROM employee WHERE id = ?';
+        const [employeeResults, employeeFields] = await connection.query(getEmployeeQuery, [client.added_by_employee]);
 
-            if (employeeResults.length === 0) {
-                client.added_by_employee = 'Admin';
-            } else {
-                const employee = employeeResults[0];
-                client.added_by_employee = `${employee.name} ${employee.surname}`;
-            }
+        if (employeeResults.length === 0) {
+          client.added_by_employee = 'Admin';
+        } else {
+          const employee = employeeResults[0];
+          client.added_by_employee = `${employee.name} ${employee.surname}`;
         }
+      }
 
-        return clients;
+      return clients;
     } catch (error) {
-        throw error;
+      throw error;
     }
-}
+  }
 
-  
+
 
   static async getClientById(id) {
     try {
@@ -40,16 +55,17 @@ class Client {
       throw error;
     }
   }
-  
+
 
   static async addClient(clientData) {
     try {
       // Check if the email already exists in the database
-      const emailExistsQuery = 'SELECT id FROM client WHERE email = ?';
+      const emailExistsQuery = 'SELECT * FROM client WHERE email = ?';
       const [existingClients, _] = await connection.query(emailExistsQuery, [clientData.email]);
 
       if (existingClients.length > 0) {
-        throw new Error('A client with the provided email already exists.');
+        const user = await getEmployeeOrAdminById(existingClients[0].added_by_employee)
+        throw new Error(`A client with the provided email already exists. added by: ${user.fname +' '+ user.lname}`);
       }
 
       // If email is unique, insert the new client
@@ -67,32 +83,32 @@ class Client {
       if (!clientData || Object.keys(clientData).length === 0) {
         throw new Error('Please provide data to modify the client.');
       }
-  
+
       // Check if the email already exists for another client
       if (clientData.email) {
         const emailExistsQuery = 'SELECT id FROM client WHERE email = ? AND id != ?';
         const [existingClients, _] = await connection.query(emailExistsQuery, [clientData.email, id]);
-  
+
         if (existingClients.length > 0) {
           throw new Error('A client with the provided email already exists.');
         }
       }
-  
+
       const updateQuery = 'UPDATE client SET ? WHERE id = ?';
       const [result, fields] = await connection.query(updateQuery, [clientData, id]);
-  
+
       if (result.affectedRows === 0) {
         throw new Error('Client not found. No changes made.');
       }
-  
+
       return 'Client updated successfully.';
     } catch (error) {
       console.error(error); // Log the error for debugging
       throw error; // Throw the original error, don't wrap it in a new error message
     }
   }
-  
-  
+
+
 
 
 

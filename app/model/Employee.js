@@ -243,7 +243,16 @@ class Employee {
             throw error;
         }
     }
-
+    static async getEmployeeClient(id ) {
+        try {
+            const Query = 'SELECT * FROM client  WHERE added_by_employee = ?';
+            const [result, _] = await connection.query(Query, [ id]);
+            return result;
+        } catch (error) {
+            console.error('get employee clients error:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = Employee;
