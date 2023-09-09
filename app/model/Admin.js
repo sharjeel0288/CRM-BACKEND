@@ -186,6 +186,26 @@ class Admin {
             throw error;
         }
     }
+    static async getAllSalesEmployees() {
+        try {
+            const selectQuery = 'SELECT * FROM employee WHERE is_deleted = 0 and department = "sales"';
+            const [employees, fields] = await connection.query(selectQuery);
+            return employees;
+        } catch (error) {
+            console.error('Get all employees error:', error);
+            throw error;
+        }
+    }
+    static async getAllAccountsEmployees() {
+        try {
+            const selectQuery = 'SELECT * FROM employee WHERE is_deleted = 0 and department = "accounts"';
+            const [employees, fields] = await connection.query(selectQuery);
+            return employees;
+        } catch (error) {
+            console.error('Get all employees error:', error);
+            throw error;
+        }
+    }
 
     static async getEmployeeById(employeeId) {
         try {

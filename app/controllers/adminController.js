@@ -92,6 +92,34 @@ const getAllEmployees = async (req, res) => {
     }
 };
 
+const getAllSalesEmployees = async (req, res) => {
+    // const department = req.user.department;
+    // if (department !== 'admin') {
+    //     return res.status(403).json({ success: false, message: 'Only admins are allowed to access employee list.' });
+    // }
+
+    try {
+        const employees = await Admin.getAllSalesEmployees();
+        res.status(200).json({ success: true, employees });
+    } catch (error) {
+        console.error('Get all employees error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get employees', error: error.message });
+    }
+};
+const getAllAccountsEmployees = async (req, res) => {
+    // const department = req.user.department;
+    // if (department !== 'admin') {
+    //     return res.status(403).json({ success: false, message: 'Only admins are allowed to access employee list.' });
+    // }
+
+    try {
+        const employees = await Admin.getAllAccountsEmployees();
+        res.status(200).json({ success: true, employees });
+    } catch (error) {
+        console.error('Get all employees error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get employees', error: error.message });
+    }
+};
 // Get employee by ID
 const getEmployeeById = async (req, res) => {
     const { id } = req.params;
@@ -248,6 +276,8 @@ module.exports = {
     editEmployee,
     deleteEmployee,
     getAllEmployees,
+    getAllSalesEmployees,
+    getAllAccountsEmployees,
     getEmployeeById,
     createAnnouncement,
     deleteAnnouncement,

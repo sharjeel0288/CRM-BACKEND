@@ -41,7 +41,7 @@ class Client {
     }
   }
 
-
+  
 
   static async getClientById(id) {
     try {

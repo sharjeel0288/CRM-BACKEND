@@ -13,6 +13,8 @@ router.post('/admin/signup', validation.validateAdminSignup, adminController.adm
 router.post('/admin/create-employee', validation.validateEmployee, adminController.createEmployee);
 router.delete('/admin/delete-employee/:id', adminController.deleteEmployee);
 router.get('/admin/all-employees', adminController.getAllEmployees);
+router.get('/admin/all-salesEmployees', adminController.getAllSalesEmployees);
+router.get('/admin/all-accountsEmployees', adminController.getAllAccountsEmployees);
 router.get('/admin/employee/:id', authMiddleware.authenticateAdmin, adminController.getEmployeeById);
 router.put('/admin/edit-employee/:id', adminController.editEmployee);
 
