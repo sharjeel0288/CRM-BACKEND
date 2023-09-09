@@ -10,6 +10,8 @@ const clientSchema = Joi.object({
   lname: Joi.string().required(),
   phone: Joi.string().pattern(/^[0-9]+(?:[-\s][0-9]+)*$/).required(),
   email: Joi.string().email().required(),
+  vat: Joi.string().required(),
+  address: Joi.string().required(),
   date: Joi.date().allow(null),
   added_by_employee: Joi.string().allow('Admin').required(),
   company_name: Joi.string().required(),

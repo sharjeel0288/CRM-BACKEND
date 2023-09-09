@@ -1,4 +1,6 @@
 // app\controllers\QuoteController.js
+const Client = require('../model/Client');
+const Invoice = require('../model/Invoice');
 const Quote = require('../model/Quote');
 
 const createQuote = async (req, res) => {
@@ -126,7 +128,87 @@ const deleteQuote = async (req, res) => {
     }
 };
 
+async function updateApprovedByClient(req, res) {
+    try {
+        const { quoteId } = req.params;
+        const { isApprovedByClient } = req.body;
 
+        // Validate the input value
+        if (![0, 1].includes(isApprovedByClient)) {
+            return res.status(400).json({ success: false, message: 'Invalid value for isApprovedByClient' });
+        }
+
+        // Update the approval status in the database
+        const result = await Quote.updateApprovalStatusByClient(quoteId, isApprovedByClient);
+
+        if (result.success) {
+            return res.status(200).json({ success: true, message: 'Approval status updated successfully' });
+        } else {
+            return res.status(400).json({ success: false, message: result.message });
+        }
+    } catch (error) {
+        console.error('Update approval status by client error:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+
+async function convertQuoteToInvoice(req, res) {
+    try {
+        const { quoteId, employeeEmail } = req.body;
+
+        // Fetch the quote by ID
+        const quote = await Quote.getQuoteById(quoteId);
+
+        if (!quote) {
+            return res.status(404).json({ success: false, message: 'Quote not found' });
+        }
+
+        // Check if the quote has already been converted to an invoice
+        if (quote.is_converted_to_invoice) {
+            return res.status(400).json({ success: false, message: 'Quote is already converted to an invoice' });
+        }
+        const client= await Client.getClientById(quote.client_id)
+        
+        // Create an invoice based on the quote data
+        const invoiceData = {
+            client_email: client.email,
+            isPerforma: 0, // You may need to set this value as per your application logic
+            number: quote.number, // You can implement a function to generate invoice numbers
+            invoice_current_date: new Date(), // Use the current date for invoice creation
+            status: 0, // You may need to set the initial status as per your application logic
+            expiry_date: quote.expiry_date,
+            terms_and_condition: quote.terms_and_condition,
+            note: quote.note,
+            payment_terms: quote.payment_terms,
+            execution_time: quote.execution_time,
+            bank_details: quote.bank_details,
+            // added_by_employee: employeeId, // Set the employee ID who added the invoice
+            employee_email:employeeEmail,
+        };
+
+        const invoiceItemsData = quote.quoteItems; // You already have the quote items
+        console.log("client: ",client)
+        // Create the invoice
+        const invoiceId = await Invoice.createInvoice(invoiceData, invoiceItemsData);
+
+        // Update the added-by employee to the specified employee ID
+        // await Invoice.updateInvoiceData(invoiceId, { added_by_employee: employeeId });
+
+        // Mark the quote as converted to an invoice
+        await Quote.updateQuoteData(quoteId, { is_converted_to_invoice: true });
+
+        res.status(200).json({ success: true, message: 'Quote converted to invoice successfully', invoiceId });
+    } catch (error) {
+        console.error('Convert quote to invoice error:', error);
+        res.status(500).json({ success: false, message: 'Failed to convert quote to invoice', error: error.message });
+    }
+};
+function generateUniqueInvoiceNumber() {
+    // Implement your logic here to generate a unique invoice number
+    // For example: use a combination of date and a random number
+    const uniqueNumber = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    return uniqueNumber;
+}
 module.exports = {
     createQuote,
     getAllQuotes,
@@ -135,4 +217,6 @@ module.exports = {
     deleteQuote,
     updateApprovalStatus,
     getAllQuotesWithAdminStatus,
+    updateApprovedByClient,
+    convertQuoteToInvoice,
 };

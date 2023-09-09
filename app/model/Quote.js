@@ -183,7 +183,6 @@ class Quote {
         }
     }
     static async getQuoteById(quoteId) {
-        console.log('qqqqqqqqqqqqqqqqqqqq', quoteId)
         const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
         const approvedList = ["NO", "PENDING ", "YES", "REJECTED"]
         try {
@@ -232,6 +231,7 @@ class Quote {
                     };
                 }
             }
+            console.log("addedByInfo:",addedByInfo)
             // Get payments for the invoice
             const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
 
@@ -252,7 +252,7 @@ class Quote {
                 tax: tax,
                 employee_name: addedByInfo.employee_name,
                 employee_surname: addedByInfo.employee_surname, // Using lname field for admin's name
-                employee_email: addedByInfo.email,
+                employee_email: addedByInfo.employee_email,
                 // is_approved_by_admin:quote.is_approved_by_admin
             };
 
@@ -370,7 +370,25 @@ class Quote {
     }
 
 
+    static async updateApprovalStatusByClient(quoteId, isApprovedByClient) {
+        try {
+            // Validate the input value
+            if (![0, 1].includes(isApprovedByClient)) {
+                throw new Error('Invalid value for isApprovedByClient');
+            }
+
+            const updateApprovalQuery = 'UPDATE quote SET is_approved_by_client = ? WHERE id = ?';
+            await connection.query(updateApprovalQuery, [isApprovedByClient, quoteId]);
+
+            return { success: true, message: 'Approval status updated successfully' };
+        } catch (error) {
+            console.error('Update approval status by client error:', error);
+            throw { success: false, message: 'Failed to update approval status by client', error: error.message };
+        }
+    }
+
 }
+
 
 function generateUniqueQuoteNumber() {
     // Implement your logic here to generate a unique quote number

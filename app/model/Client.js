@@ -65,7 +65,7 @@ class Client {
 
       if (existingClients.length > 0) {
         const user = await getEmployeeOrAdminById(existingClients[0].added_by_employee)
-        throw new Error(`A client with the provided email already exists. added by: ${user.fname +' '+ user.lname}`);
+        throw new Error(`A client with the provided email already exists. added by: ${user.fname + ' ' + user.lname}`);
       }
 
       // If email is unique, insert the new client

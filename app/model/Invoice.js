@@ -15,7 +15,7 @@ class Invoice {
         try {
             const clientEmail = invoiceData.client_email;
             const addedByEmployeeEmail = invoiceData.employee_email;
-
+            
             // Find client ID using client's email
             const [clientResult, _] = await connection.query('SELECT id FROM client WHERE email = ?', [clientEmail]);
             const clientId = clientResult[0]?.id;
@@ -294,11 +294,13 @@ class Invoice {
     }
 }
 
-function generateUniqueInvoiceNumber() {
+
+ function generateUniqueInvoiceNumber() {
     // Implement your logic here to generate a unique invoice number
     // For example: use a combination of date and a random number
     const uniqueNumber = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     return uniqueNumber;
 }
+
 
 module.exports = Invoice;

@@ -15,6 +15,8 @@ router.put('/quote/:id/edit',authMiddleware.authAdminSales, quoteController.edit
 router.delete('/quote/:id/delete', authMiddleware.authAdminSales,quoteController.deleteQuote); 
 router.patch('/quotes/:quoteId/approval', quoteController.updateApprovalStatus);
 router.get('/quote/:status/adminStatus', quoteController.getAllQuotesWithAdminStatus);
+router.patch('/quote/:quoteId/approvedByClient', quoteController.updateApprovedByClient);
+router.post('/quote/convertQuoteToInvoice', quoteController.convertQuoteToInvoice);
 
 router.use(quoteItemRoutes);
 
