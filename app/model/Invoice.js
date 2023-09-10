@@ -54,6 +54,7 @@ class Invoice {
                 execution_time: invoiceData.execution_time,
                 bank_details: invoiceData.bank_details,
                 isPerforma: invoiceData.isPerforma,
+                discount:invoiceData.discount
                 // payment_mode_id: invoiceData.paymentModeId,
 
             };
@@ -261,7 +262,8 @@ class Invoice {
                 bank_details: updatedInvoiceData.bank_details || existingInvoiceData.bank_details,
                 added_by_employee: existingInvoiceData.added_by_employee,
                 isPerforma: updatedInvoiceData.isPerforma || existingInvoiceData.isPerforma,
-                note: updatedInvoiceData.note || existingInvoiceData.note
+                note: updatedInvoiceData.note || existingInvoiceData.note,
+                discount: updatedInvoiceData.note || existingInvoiceData.note
 
             };
             // Convert the provided expiry_date string to a JavaScript Date object

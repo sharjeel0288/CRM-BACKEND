@@ -48,6 +48,27 @@ const getAllQuotes = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to get Quote', error: error.message });
     }
 };
+const getAllApprovedByClientQuotes = async (req, res) => {
+    try {
+        const quotes = await Quote.getAllApprovedByClientQuotes();
+        const QuotesWithDetails = [];
+
+        for (const quote of quotes) {
+            const quotesData = await Quote.getQuoteById(quote.id);
+            const quotesItemsData = await Quote.getQuoteItemsByQuoteId(quote.id);
+
+            QuotesWithDetails.push({
+                quotesData,
+                quotesItemsData
+            });
+        }
+
+        res.status(200).json({ success: true, Quote: QuotesWithDetails });
+    } catch (error) {
+        console.error('Get all Quote error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get Quote', error: error.message });
+    }
+};
 const getAllQuotesWithAdminStatus = async (req, res) => {
     try {
         const isApprovedStatus = req.params.status; // Read the query parameter
@@ -203,12 +224,7 @@ async function convertQuoteToInvoice(req, res) {
         res.status(500).json({ success: false, message: 'Failed to convert quote to invoice', error: error.message });
     }
 };
-function generateUniqueInvoiceNumber() {
-    // Implement your logic here to generate a unique invoice number
-    // For example: use a combination of date and a random number
-    const uniqueNumber = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-    return uniqueNumber;
-}
+
 module.exports = {
     createQuote,
     getAllQuotes,
@@ -219,4 +235,5 @@ module.exports = {
     getAllQuotesWithAdminStatus,
     updateApprovedByClient,
     convertQuoteToInvoice,
+    getAllApprovedByClientQuotes,
 };

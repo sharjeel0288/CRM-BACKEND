@@ -55,7 +55,9 @@ class Quote {
                 payment_terms: quoteData.payment_terms,
                 execution_time: quoteData.execution_time,
                 bank_details: quoteData.bank_details,
-                is_approved_by_admin: isApproved
+                is_approved_by_admin: isApproved,
+                discount: quoteData.discount,
+                note: quoteData.note
                 // payment_mode_id: paymentModeId,
             };
             const [quoteInsertResult, ___] = await connection.query(insertQuoteQuery, quoteDataToInsert);
@@ -93,6 +95,39 @@ class Quote {
             FROM quote q
             JOIN client c ON q.client_id = c.id
             ORDER BY quote_current_date DESC
+            
+            `;
+            const [quotes, fields] = await connection.query(selectQuery);
+
+            const QouteDetailsWithStatus = [];
+
+            for (const quote of quotes) {
+                const quoteId = quote.id;
+                const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
+
+                const totalAmount = quoteItems.reduce((total, item) => total + parseFloat(item.item_total), 0);
+
+                const QouteDetails = {
+                    ...quote,
+                };
+
+                QouteDetailsWithStatus.push(QouteDetails);
+            }
+
+            return QouteDetailsWithStatus;
+        } catch (error) {
+            console.error('Get all invoices error:', error);
+            throw error;
+        }
+    }
+    static async getAllApprovedByClientQuotes() {
+        try {
+            const selectQuery = `
+            SELECT q.*, c.email AS client_email
+            FROM quote q 
+            JOIN client c ON q.client_id = c.id
+            WHERE is_converted_to_invoice = 0 and  is_approved_by_client = 1
+            ORDER BY quote_current_date DESC;
             
             `;
             const [quotes, fields] = await connection.query(selectQuery);
@@ -231,7 +266,7 @@ class Quote {
                     };
                 }
             }
-            console.log("addedByInfo:",addedByInfo)
+            console.log("addedByInfo:", addedByInfo)
             // Get payments for the invoice
             const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
 
@@ -334,7 +369,9 @@ class Quote {
                 execution_time: updatedQuoteData.execution_time || existingQuoteData.execution_time,
                 bank_details: updatedQuoteData.bank_details || existingQuoteData.bank_details,
                 added_by_employee: updatedQuoteData.added_by_employee || existingQuoteData.added_by_employee,
-                is_approved_by_admin: isApproved
+                is_approved_by_admin: isApproved,
+                note: updatedQuoteData.note || existingQuoteData.note,
+                discount: updatedQuoteData.discount || existingQuoteData.discount
                 // payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
             console.log(newQuoteData.is_approved_by_admin)

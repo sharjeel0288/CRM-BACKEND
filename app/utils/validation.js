@@ -165,6 +165,12 @@ const quoteValidationSchema = Joi.object({
   bank_details: Joi.string().required().messages({
     'any.required': 'Bank details are required',
   }),
+  discount: Joi.number().integer().min(0).required().messages({
+    'number.base': 'Discount must be a number',
+    'number.integer': 'Discount must be an integer',
+    'number.min': 'Discount must be 0 or a positive integer',
+    'any.required': 'Discount is required',
+  }),
   quoteItemsData: Joi.array().items(
     Joi.object({
       item_name: Joi.string().required().messages({
@@ -224,7 +230,12 @@ const invoiceSchema = Joi.object({
     note: Joi.string().required(),
     bank_details: Joi.string().required(),
     isPerforma: Joi.number().integer().min(0).max(1).required(), // Add this line
-
+    discount: Joi.number().integer().min(0).required().messages({
+      'number.base': 'Discount must be a number',
+      'number.integer': 'Discount must be an integer',
+      'number.min': 'Discount must be 0 or a positive integer',
+      'any.required': 'Discount is required',
+    }),
   }).required(),
   invoiceItemsData: Joi.array().items(Joi.object({
     item_name: Joi.string().required(),

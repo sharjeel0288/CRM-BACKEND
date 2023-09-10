@@ -13,7 +13,7 @@ const dbConfig = {
 // Create a promise-based pool for MySQL connections
 const pool = mysql.createPool({
   ...dbConfig,
-  connectionLimit: 10, // Adjust the connection limit as needed
+  connectionLimit: 40, // Adjust the connection limit as needed
 });
 
 // Run the table creation script when the pool is created
@@ -73,9 +73,7 @@ const pool = mysql.createPool({
         execution_time VARCHAR(255),
         bank_details TEXT,
         added_by_employee INT, -- Employee ID who added the invoice
-        FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE
-        
-        
+        FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE        
         );
         -- FOREIGN KEY (payment_mode_id) REFERENCES payment_mode(id) 
       
@@ -107,6 +105,8 @@ const pool = mysql.createPool({
         terms_and_condition TEXT,
         is_approved_by_admin INT DEFAULT 0,
         is_approved_by_client INT DEFAULT 0,
+        is_converted_to_invoice INT DEFAULT 0,
+        discount INT,
         note TEXT,
         payment_terms TEXT,
         execution_time VARCHAR(255),

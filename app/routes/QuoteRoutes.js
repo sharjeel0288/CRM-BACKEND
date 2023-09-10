@@ -7,6 +7,8 @@ const PDFController = require('../controllers/PDFController');
 const quoteItemRoutes = require('./quoteItemRoutes');
 const router = express.Router();
 
+router.get('/quote/getAllApprovedByClientQuotes', quoteController.getAllApprovedByClientQuotes);
+
 router.get('/quote/:id/pdf',authMiddleware.authAdminSales, PDFController.GetQuotePdfDetails);
 router.post('/quote/create',validation.validateQuote, quoteController.createQuote);
 router.get('/quote/all', quoteController.getAllQuotes);
