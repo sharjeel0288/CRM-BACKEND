@@ -72,6 +72,7 @@ const pool = mysql.createPool({
         payment_terms TEXT,
         execution_time VARCHAR(255),
         bank_details TEXT,
+        is_LPO INT DEFAULT 0,
         added_by_employee INT, -- Employee ID who added the invoice
         FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE        
         );
@@ -93,6 +94,13 @@ const pool = mysql.createPool({
         FOREIGN KEY (invoice_id) REFERENCES invoice(id) ON DELETE CASCADE
       );
       
+
+      
+
+
+
+
+
       CREATE TABLE IF NOT EXISTS quote (
         id INT PRIMARY KEY AUTO_INCREMENT,
         client_id INT,

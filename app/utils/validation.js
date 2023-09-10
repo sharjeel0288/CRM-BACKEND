@@ -230,6 +230,7 @@ const invoiceSchema = Joi.object({
     note: Joi.string().required(),
     bank_details: Joi.string().required(),
     isPerforma: Joi.number().integer().min(0).max(1).required(), // Add this line
+    is_LPO: Joi.number().integer().min(0).max(1).required(),
     discount: Joi.number().integer().min(0).required().messages({
       'number.base': 'Discount must be a number',
       'number.integer': 'Discount must be an integer',

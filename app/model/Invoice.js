@@ -15,7 +15,7 @@ class Invoice {
         try {
             const clientEmail = invoiceData.client_email;
             const addedByEmployeeEmail = invoiceData.employee_email;
-            
+
             // Find client ID using client's email
             const [clientResult, _] = await connection.query('SELECT id FROM client WHERE email = ?', [clientEmail]);
             const clientId = clientResult[0]?.id;
@@ -54,7 +54,8 @@ class Invoice {
                 execution_time: invoiceData.execution_time,
                 bank_details: invoiceData.bank_details,
                 isPerforma: invoiceData.isPerforma,
-                discount:invoiceData.discount
+                discount: invoiceData.discount,
+                is_LPO: invoiceData.is_LPO,
                 // payment_mode_id: invoiceData.paymentModeId,
 
             };
@@ -263,7 +264,8 @@ class Invoice {
                 added_by_employee: existingInvoiceData.added_by_employee,
                 isPerforma: updatedInvoiceData.isPerforma || existingInvoiceData.isPerforma,
                 note: updatedInvoiceData.note || existingInvoiceData.note,
-                discount: updatedInvoiceData.note || existingInvoiceData.note
+                discount: updatedInvoiceData.note || existingInvoiceData.note,
+                is_LPO: existingInvoiceData.is_LPO,
 
             };
             // Convert the provided expiry_date string to a JavaScript Date object
@@ -297,7 +299,7 @@ class Invoice {
 }
 
 
- function generateUniqueInvoiceNumber() {
+function generateUniqueInvoiceNumber() {
     // Implement your logic here to generate a unique invoice number
     // For example: use a combination of date and a random number
     const uniqueNumber = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
