@@ -4,9 +4,9 @@ const mysql = require('mysql2/promise'); // Import promise-based mysql2 library
 const dbConfig = {
   host: "localhost",
   user: "root",
-  password: "ahzam",
+  password: "1234",
   database: "crm",
-  port: "3306",
+  port: "3308",
 };
 
 
@@ -71,7 +71,7 @@ const pool = mysql.createPool({
         discount INT,
         note TEXT,
         payment_terms TEXT,
-        execution_time VARCHAR(255),
+        execution_time TEXT,
         bank_details TEXT,
         is_LPO INT DEFAULT 0,
         added_by_employee INT, -- Employee ID who added the invoice
@@ -118,7 +118,7 @@ const pool = mysql.createPool({
         discount INT,
         note TEXT,
         payment_terms TEXT,
-        execution_time VARCHAR(255),
+        execution_time TEXT,
         bank_details TEXT,
         FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE
         );

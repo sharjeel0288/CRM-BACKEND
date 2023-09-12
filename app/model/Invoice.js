@@ -142,7 +142,7 @@ class Invoice {
                 WHERE q.id = ?;
             `;
             const [invoices, fields] = await connection.query(selectQuery, [invoiceId]);
-
+console.log(invoices)
             if (invoices.length === 0) {
                 throw new Error('Invoice not found');
             }
