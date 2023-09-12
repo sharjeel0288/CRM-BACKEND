@@ -60,7 +60,7 @@ class Client {
   static async addClient(clientData) {
     try {
       // Check if the email or phone number already exists in the database
-      const emailExistsQuery = 'SELECT * FROM client WHERE email = ? OR number = ?';
+      const emailExistsQuery = 'SELECT * FROM client WHERE email = ? OR phone = ?';
       const [existingClients, _] = await connection.query(emailExistsQuery, [clientData.email, clientData.phone]);
 
       if (existingClients.length > 0) {
@@ -101,7 +101,7 @@ class Client {
 
       // Check if the number already exists for another client
       if (clientData.number) {
-        const numberExistsQuery = 'SELECT id FROM client WHERE number = ? AND id != ?';
+        const numberExistsQuery = 'SELECT id FROM client WHERE phone = ? AND id != ?';
         const [existingClientsWithNumber, _] = await connection.query(numberExistsQuery, [clientData.number, id]);
 
         if (existingClientsWithNumber.length > 0) {

@@ -4,9 +4,9 @@ const mysql = require('mysql2/promise'); // Import promise-based mysql2 library
 const dbConfig = {
   host: "localhost",
   user: "root",
-  password: "1234",
+  password: "ahzam",
   database: "crm",
-  port: "3308",
+  port: "3306",
 };
 
 
@@ -68,6 +68,7 @@ const pool = mysql.createPool({
         status INT,
         expiry_date DATE,
         terms_and_condition TEXT,
+        discount INT,
         note TEXT,
         payment_terms TEXT,
         execution_time VARCHAR(255),
