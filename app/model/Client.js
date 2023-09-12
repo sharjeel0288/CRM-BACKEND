@@ -41,7 +41,7 @@ class Client {
     }
   }
 
-  
+
 
   static async getClientById(id) {
     try {
@@ -59,21 +59,26 @@ class Client {
 
   static async addClient(clientData) {
     try {
-      // Check if the email already exists in the database
-      const emailExistsQuery = 'SELECT * FROM client WHERE email = ?';
-      const [existingClients, _] = await connection.query(emailExistsQuery, [clientData.email]);
+      // Check if the email or phone number already exists in the database
+      const emailExistsQuery = 'SELECT * FROM client WHERE email = ? OR number = ?';
+      const [existingClients, _] = await connection.query(emailExistsQuery, [clientData.email, clientData.phone]);
 
       if (existingClients.length > 0) {
-        const user = await getEmployeeOrAdminById(existingClients[0].added_by_employee)
-        throw new Error(`A client with the provided email already exists. added by: ${user.fname + ' ' + user.lname}`);
+        const user = await getEmployeeOrAdminById(existingClients[0].added_by_employee);
+        throw new Error(`A client with the provided email or phone number already exists. Added by: ${user.fname} ${user.lname}`);
       }
 
-      // If email is unique, insert the new client
+      // If email and phone number are unique, insert the new client
       const insertQuery = 'INSERT INTO client SET ?';
       const [result, fields] = await connection.query(insertQuery, [clientData]);
-      return result.insertId;
+
+      if (result.affectedRows === 1) {
+        return result.insertId;
+      } else {
+        throw new Error('Client registration failed.');
+      }
     } catch (error) {
-      console.log(error)
+      console.error(error);
       throw error;
     }
   }
