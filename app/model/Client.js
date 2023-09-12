@@ -92,10 +92,20 @@ class Client {
       // Check if the email already exists for another client
       if (clientData.email) {
         const emailExistsQuery = 'SELECT id FROM client WHERE email = ? AND id != ?';
-        const [existingClients, _] = await connection.query(emailExistsQuery, [clientData.email, id]);
+        const [existingClientsWithEmail, _] = await connection.query(emailExistsQuery, [clientData.email, id]);
 
-        if (existingClients.length > 0) {
+        if (existingClientsWithEmail.length > 0) {
           throw new Error('A client with the provided email already exists.');
+        }
+      }
+
+      // Check if the number already exists for another client
+      if (clientData.number) {
+        const numberExistsQuery = 'SELECT id FROM client WHERE number = ? AND id != ?';
+        const [existingClientsWithNumber, _] = await connection.query(numberExistsQuery, [clientData.number, id]);
+
+        if (existingClientsWithNumber.length > 0) {
+          throw new Error('A client with the provided number already exists.');
         }
       }
 
@@ -111,6 +121,7 @@ class Client {
       console.error(error); // Log the error for debugging
       throw error; // Throw the original error, don't wrap it in a new error message
     }
+
   }
 
 
