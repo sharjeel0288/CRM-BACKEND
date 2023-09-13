@@ -5,6 +5,8 @@ const connection = require('../../config/DbConfig');
 
 class InvoiceItem {
     static async addInvoiceItem(invoiceId, itemData) {
+        console.log('add item : ',invoiceId)
+        console.log("item data: ",itemData)
         try {
             const insertQuery = 'INSERT INTO invoice_item SET ?';
             const [result] = await connection.query(insertQuery, { invoice_id: invoiceId, ...itemData });

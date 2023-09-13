@@ -275,12 +275,12 @@ const invoiceItemSchema = Joi.object({
     'number.min': 'Item quantity must be at least 1',
     'number.base': 'Item quantity must be a number',
   }),
-  item_xdim: Joi.number().positive().required().messages({
+  item_xdim: Joi.number().min(0).required().messages({
     'any.required': 'Item dimension X is required',
     'number.base': 'Item dimension X must be a number',
     'number.positive': 'Item dimension X must be a positive number',
   }),
-  item_ydim: Joi.number().positive().required().messages({
+  item_ydim: Joi.number().min(0).required().messages({
     'any.required': 'Item dimension Y is required',
     'number.base': 'Item dimension Y must be a number',
     'number.positive': 'Item dimension Y must be a positive number',

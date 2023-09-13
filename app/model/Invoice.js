@@ -265,7 +265,7 @@ console.log(invoices)
                 added_by_employee: existingInvoiceData.added_by_employee,
                 isPerforma: updatedInvoiceData.isPerforma || existingInvoiceData.isPerforma,
                 note: updatedInvoiceData.note || existingInvoiceData.note,
-                discount: updatedInvoiceData.note || existingInvoiceData.note,
+                discount: updatedInvoiceData.discount || existingInvoiceData.discount,
                 is_LPO: existingInvoiceData.is_LPO,
 
             };
