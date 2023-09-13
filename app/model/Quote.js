@@ -158,7 +158,11 @@ class Quote {
         const approvedList = ["NO", "PENDING ", "YES", "REJECTED"]
         try {
             const selectQuery = `
-                SELECT q.*, c.email AS client_email
+                SELECT q.*, c.email AS client_email,
+                c.id as client_id,
+                c.fname AS client_fname, c.lname AS client_lname,
+                c.phone as client_phone, c.address as client_address,
+                c.vat as client_vat
                 FROM quote q
                 JOIN client c ON q.client_id = c.id
                 WHERE q.is_approved_by_admin = ?
@@ -225,7 +229,8 @@ class Quote {
                 SELECT q.*, c.email AS client_email,
                
                 c.fname AS client_fname, c.lname AS client_lname,
-                c.phone as client_phone
+                c.phone as client_phone, c.address as client_address,
+                c.vat as client_vat
                 FROM quote q
                 JOIN client c ON q.client_id = c.id
                 
