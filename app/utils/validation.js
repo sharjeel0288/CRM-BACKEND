@@ -13,7 +13,7 @@ const clientSchema = Joi.object({
   vat: Joi.string().required(),
   address: Joi.string().required(),
   date: Joi.date().allow(null),
-  added_by_employee: Joi.string().allow('Admin').required(),
+  added_by_employee: Joi.number().integer().required(),
   company_name: Joi.string().required(),
 });
 
