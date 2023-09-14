@@ -66,6 +66,8 @@ const pool = mysql.createPool({
         number VARCHAR(50),
         invoice_current_date DATE,
         status INT,
+        pname TEXT,
+        location TEXT,
         expiry_date DATE,
         terms_and_condition TEXT,
         discount INT,

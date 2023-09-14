@@ -157,6 +157,7 @@ class Quote {
         const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
         const approvedList = ["NO", "PENDING ", "YES", "REJECTED"]
         try {
+            console.log("Get admin status quotes is_approved_status ", is_approved_status)
             const selectQuery = `
                 SELECT q.*, c.email AS client_email,
                 c.id as client_id,
@@ -214,7 +215,7 @@ class Quote {
 
                 QuotesWithDetails.push(QuoteDetails);
             }
-
+            console.log("-------------", QuotesWithDetails)
             return QuotesWithDetails;
         } catch (error) {
             console.error('Get all quotes error:', error);
@@ -306,28 +307,31 @@ class Quote {
     static async updateApprovalStatus(quoteId, isApprovedByAdmin) {
         const statusList = ['DRAFT', 'PENDING', 'SENT', 'EXPIRED', 'DECLINE', 'ACCEPTED', 'LOST'];
         try {
-          // Validate the input value
-          if (![2, 3].includes(isApprovedByAdmin)) {
-            throw new Error('Invalid value for isApprovedByAdmin');
-          }
-      
-          let status;
-          if (isApprovedByAdmin === 2) {
-            status = 6; // Use the corresponding status string from statusList
-          } else {
-            status = 5; // Use the corresponding status string from statusList
-          }
-      
-          const updateApprovalQuery = 'UPDATE quote SET is_approved_by_admin = ?, status = ? WHERE id = ?';
-          await connection.query(updateApprovalQuery, [isApprovedByAdmin, status, quoteId]);
-      
-          return { success: true, message: 'Approval status updated successfully' };
+            // Validate the input value
+            console.log("approval status: ", isApprovedByAdmin)
+            if (![2, 3].includes(isApprovedByAdmin)) {
+                throw new Error('Invalid value for isApprovedByAdmin');
+            }
+
+            let status;
+            console.log('isApprovedByAdmin===2: ', isApprovedByAdmin === 2)
+            console.log('isApprovedByAdmin===3: ', isApprovedByAdmin === 3)
+            if (isApprovedByAdmin === 2) {
+                status = 6; // Use the corresponding status string from statusList
+            } else {
+                status = 5; // Use the corresponding status string from statusList
+            }
+
+            const updateApprovalQuery = 'UPDATE quote SET is_approved_by_admin = ?, status = ? WHERE id = ?';
+            const res = await connection.query(updateApprovalQuery, [isApprovedByAdmin, status, quoteId]);
+            console.log('Res: ', res)
+            return { success: true, message: 'Approval status updated successfully' };
         } catch (error) {
-          console.error('Update approval status error:', error);
-          throw { success: false, message: 'Failed to update approval status', error: error.message };
+            console.error('Update approval status error:', error);
+            throw { success: false, message: 'Failed to update approval status', error: error.message };
         }
-      }
-      
+    }
+
     static async getQuoteItemsByQuoteId(quoteId) {
         try {
             const selectQuery = 'SELECT * FROM quote_item WHERE quote_id = ?';
@@ -365,7 +369,7 @@ class Quote {
             const selectExistingQuoteQuery = 'SELECT * FROM quote WHERE id = ?';
             const [existingQuoteRows, _] = await connection.query(selectExistingQuoteQuery, [quoteId]);
             const existingQuoteData = existingQuoteRows[0];
-            console.log('edit updatedQuoteData.status', updatedQuoteData.status)
+            // console.log('edit updatedQuoteData.status', updatedQuoteData.status)
             let isApproved
             if (updatedQuoteData.status == 3) {
                 console.log("in Iffffff")
@@ -388,7 +392,7 @@ class Quote {
                 discount: updatedQuoteData.discount || existingQuoteData.discount
                 // payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
-            console.log(newQuoteData.is_approved_by_admin)
+            // console.log(newQuoteData.is_approved_by_admin)
 
             // If client email is provided, update the client_id
             if (updatedQuoteData.client_email) {

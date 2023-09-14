@@ -19,9 +19,9 @@ const updateApprovalStatus = async (req, res) => {
     try {
         const { quoteId } = req.params;
         const { is_approved_by_admin } = req.body;
-
+        console.log("is_approved_by_admin: controller : ", is_approved_by_admin)
         const result = await Quote.updateApprovalStatus(quoteId, is_approved_by_admin);
-
+        console.log("result: ", result)
         res.json(result);
     } catch (error) {
         res.status(500).json({ success: false, message: 'An error occurred', error: error.message });
@@ -188,8 +188,8 @@ async function convertQuoteToInvoice(req, res) {
         if (quote.is_converted_to_invoice) {
             return res.status(400).json({ success: false, message: 'Quote is already converted to an invoice' });
         }
-        const client= await Client.getClientById(quote.client_id)
-        
+        const client = await Client.getClientById(quote.client_id)
+
         // Create an invoice based on the quote data
         const invoiceData = {
             client_email: client.email,
@@ -204,11 +204,11 @@ async function convertQuoteToInvoice(req, res) {
             execution_time: quote.execution_time,
             bank_details: quote.bank_details,
             // added_by_employee: employeeId, // Set the employee ID who added the invoice
-            employee_email:employeeEmail,
+            employee_email: employeeEmail,
         };
 
         const invoiceItemsData = quote.quoteItems; // You already have the quote items
-        console.log("client: ",client)
+        console.log("client: ", client)
         // Create the invoice
         const invoiceId = await Invoice.createInvoice(invoiceData, invoiceItemsData);
 
