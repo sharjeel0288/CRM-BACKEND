@@ -265,7 +265,7 @@ class Report {
                        q.quote_current_date AS quote_date, q.status,
                        q.terms_and_condition, q.payment_terms,
                        SUM(qi.item_total) AS total_amount,
-                       q.added_by_employee
+                       q.added_by_employee, q.number
                 FROM quote q
                 LEFT JOIN quote_item qi ON q.id = qi.quote_id
                 LEFT JOIN client c ON q.client_id = c.id
@@ -324,7 +324,7 @@ class Report {
                 SELECT CONCAT(c.fname, ' ', c.lname) AS client_name,
                        i.invoice_current_date AS invoice_current_date, i.status,
                        i.terms_and_condition, i.payment_terms,
-                       SUM(ii.item_total) AS total_amount
+                       SUM(ii.item_total) AS total_amount, i.number
                 FROM invoice i
                 LEFT JOIN invoice_item ii ON i.id = ii.invoice_id
                 LEFT JOIN client c ON i.client_id = c.id
