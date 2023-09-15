@@ -222,7 +222,7 @@ const invoiceSchema = Joi.object({
   invoiceData: Joi.object({
     client_email: Joi.string().email().required(),
     pname: Joi.string().allow(null).optional(), // pname can be null or not given
-    address: Joi.string().allow(null).optional(), // address can be null or not given
+    location: Joi.string().allow(null).optional(), // address can be null or not given
     status: Joi.number().integer().min(1).max(7).required(),
     employee_email: Joi.string().email().required(),
     expiry_date: Joi.date().iso().required(),

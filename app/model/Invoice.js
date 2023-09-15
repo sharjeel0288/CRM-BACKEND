@@ -57,7 +57,7 @@ class Invoice {
                 discount: invoiceData.discount,
                 is_LPO: invoiceData.is_LPO,
                 pname: invoiceData.pname,
-                address: invoiceData.address,
+                location: invoiceData.location,
                 // payment_mode_id: invoiceData.paymentModeId,
 
             };
@@ -278,7 +278,7 @@ class Invoice {
                 discount: updatedInvoiceData.discount || existingInvoiceData.discount,
                 is_LPO: existingInvoiceData.is_LPO,
                 pname: existingInvoiceData.pname || updatedInvoiceData.pname,
-                address: existingInvoiceData.address || updatedInvoiceData.address,
+                location: existingInvoiceData.location || updatedInvoiceData.location,
 
             };
             // Convert the provided expiry_date string to a JavaScript Date object
