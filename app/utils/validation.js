@@ -51,11 +51,12 @@ const employeeSchema = Joi.object({
   birthday: Joi.date().iso().required(),
   department: Joi.string().required(),
   position: Joi.string().required(),
-  phone: Joi.string().required(),
+  phone: Joi.string()
+    .pattern(/^\d{11}$/) // Matches exactly 11 digits
+    .required(),
   email: Joi.string().email().required(),
   password: Joi.string().required(),
 });
-
 
 const validateEmployee = (req, res, next) => {
   const { error } = employeeSchema.validate(req.body);
