@@ -56,6 +56,8 @@ class Invoice {
                 isPerforma: invoiceData.isPerforma,
                 discount: invoiceData.discount,
                 is_LPO: invoiceData.is_LPO,
+                pname: invoiceData.pname,
+                address: invoiceData.address,
                 // payment_mode_id: invoiceData.paymentModeId,
 
             };
@@ -143,7 +145,7 @@ class Invoice {
                 WHERE q.id = ?;
             `;
             const [invoices, fields] = await connection.query(selectQuery, [invoiceId]);
-console.log(invoices)
+            console.log(invoices)
             if (invoices.length === 0) {
                 throw new Error('Invoice not found');
             }
@@ -154,6 +156,9 @@ console.log(invoices)
             let addedByInfo = {
                 employee_name: '',
                 employee_surname: '',
+                employee_phone:'',
+                employee_email:''
+
             };
 
             const addedByEmployeeQuery = `SELECT * FROM employee WHERE id = ?`;
@@ -163,7 +168,9 @@ console.log(invoices)
                 addedByInfo = {
                     employee_name: employeeResult[0].name,
                     employee_surname: employeeResult[0].surname,
-                    employee_email: employeeResult[0].email
+                    employee_email: employeeResult[0].email,
+                    employee_phone: employeeResult[0].phone
+
                 };
             } else {
                 const addedByAdminQuery = `SELECT * FROM admin WHERE id = ?`;
@@ -173,7 +180,9 @@ console.log(invoices)
                     addedByInfo = {
                         employee_name: '',
                         employee_surname: adminResult[0].lname, // Using lname field for admin's name
-                        employee_email: adminResult[0].email
+                        employee_email: adminResult[0].email,
+                        employee_phone: ''
+
                     };
                 }
             }
@@ -197,7 +206,8 @@ console.log(invoices)
                 status: invoiceStatus,
                 employee_name: addedByInfo.employee_name,
                 employee_surname: addedByInfo.employee_surname,
-                employee_email: addedByInfo.email
+                employee_email: addedByInfo.email,
+                employee_phone:addedByInfo.employee_phone
             };
 
             return invoiceWithPaymentStatus;
@@ -267,6 +277,8 @@ console.log(invoices)
                 note: updatedInvoiceData.note || existingInvoiceData.note,
                 discount: updatedInvoiceData.discount || existingInvoiceData.discount,
                 is_LPO: existingInvoiceData.is_LPO,
+                pname: existingInvoiceData.pname || updatedInvoiceData.pname,
+                address: existingInvoiceData.address || updatedInvoiceData.address,
 
             };
             // Convert the provided expiry_date string to a JavaScript Date object
