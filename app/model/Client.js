@@ -34,6 +34,7 @@ class Client {
           client.added_by_employee = `${employee.name} ${employee.surname}`;
         }
       }
+      console.log("admin clients", clients)
 
       return clients;
     } catch (error) {

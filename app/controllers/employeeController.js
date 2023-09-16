@@ -124,7 +124,7 @@ const getEmployeeClients = async (req, res) => {
         }
 
         // If clients were found, return them in the response
-        return res.status(200).json({ success: true, clients: employeeClients });
+        return res.status(200).json({ success: true, data: employeeClients });
     } catch (error) {
         console.error('Controller error:', error);
         return res.status(500).json({ success: false, message: 'An error occurred', error: error.message });

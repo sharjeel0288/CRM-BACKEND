@@ -15,18 +15,18 @@ class Employee {
             // Implement your logic to fetch an employee by ID from the database
             const query = 'SELECT * FROM employee WHERE id = ?';
             const [rows] = await db.query(query, [employeeId]);
-    
+
             if (rows.length === 0) {
                 throw new Error(`Employee not found with ID: ${employeeId}`);
             }
-    
+
             return rows[0];
         } catch (error) {
             console.error('Error fetching employee:', error);
             throw error; // Re-throw the error for the caller to handle
         }
     }
-    
+
     static async login(email, password) {
         try {
             const query = 'SELECT * FROM employee WHERE email = ?';
@@ -243,13 +243,26 @@ class Employee {
             throw error;
         }
     }
-    static async getEmployeeClient(id ) {
+    static async getEmployeeClient(id) {
         try {
-            const Query = 'SELECT * FROM client  WHERE added_by_employee = ?';
-            const [result, _] = await connection.query(Query, [ id]);
-            return result;
+            const query = 'SELECT * FROM client  WHERE added_by_employee = ?';
+            const [clients, fields] = await connection.query(query, [id]);
+
+            // Iterate through each client to fetch the employee who added the client
+            for (const client of clients) {
+                const getEmployeeQuery = 'SELECT name, surname  FROM employee WHERE id = ?';
+                const [employeeResults, employeeFields] = await connection.query(getEmployeeQuery, [client.added_by_employee]);
+
+                if (employeeResults.length === 0) {
+                    client.added_by_employee = 'Admin';
+                } else {
+                    const employee = employeeResults[0];
+                    client.added_by_employee = `${employee.name} ${employee.surname}`;
+                }
+            }
+            console.log("emp clients", clients)
+            return clients;
         } catch (error) {
-            console.error('get employee clients error:', error);
             throw error;
         }
     }
