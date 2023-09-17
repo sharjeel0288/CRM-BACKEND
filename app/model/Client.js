@@ -61,12 +61,12 @@ class Client {
   static async addClient(clientData) {
     try {
       // Check if the email or phone number already exists in the database
-      const emailExistsQuery = 'SELECT * FROM client WHERE email = ? OR phone = ?';
-      const [existingClients, _] = await connection.query(emailExistsQuery, [clientData.email, clientData.phone]);
+      const emailExistsQuery = 'SELECT * FROM client WHERE email = ? OR phone = ? or company_name = ?';
+      const [existingClients, _] = await connection.query(emailExistsQuery, [clientData.email, clientData.phone, clientData.company_name]);
 
       if (existingClients.length > 0) {
         const user = await getEmployeeOrAdminById(existingClients[0].added_by_employee);
-        throw new Error(`A client with the provided email or phone number already exists. Added by: ${user.fname} ${user.lname}`);
+        throw new Error(`A client with the provided email, phone number, or company_name  already exists. Added by: ${user.fname} ${user.lname}`);
       }
 
       // If email and phone number are unique, insert the new client
@@ -107,6 +107,14 @@ class Client {
 
         if (existingClientsWithNumber.length > 0) {
           throw new Error('A client with the provided number already exists.');
+        }
+      }
+      if (clientData.company_name) {
+        const company_nameExistsQuery = 'SELECT id FROM client WHERE company_name = ? AND id != ?';
+        const [existingClientsWithCompany_name, _] = await connection.query(company_nameExistsQuery, [clientData.company_name, id]);
+
+        if (existingClientsWithCompany_name.length > 0) {
+          throw new Error('A client with the provided company_name already exists.');
         }
       }
 
