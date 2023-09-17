@@ -389,7 +389,8 @@ class Quote {
                 added_by_employee: updatedQuoteData.added_by_employee || existingQuoteData.added_by_employee,
                 is_approved_by_admin: isApproved,
                 note: updatedQuoteData.note || existingQuoteData.note,
-                discount: updatedQuoteData.discount || existingQuoteData.discount
+                discount: updatedQuoteData.discount || existingQuoteData.discount,
+                is_converted_to_invoice:updatedQuoteData.is_converted_to_invoice || existingQuoteData.is_converted_to_invoice,
                 // payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
             // console.log(newQuoteData.is_approved_by_admin)
