@@ -148,12 +148,18 @@ async function getQuotesWithDetails(employeeId) {
             });
         }
 
-        res.status(200).json({ success: true, Quote: QuotesWithDetails });
+        // The following line is causing an issue because 'res' is not defined in this scope.
+        // You should remove or refactor this line.
+        // res.status(200).json({ success: true, Quote: QuotesWithDetails });
+
+        return QuotesWithDetails; // Return the data instead
     } catch (error) {
         console.error('Get all Quote error:', error);
-        res.status(500).json({ success: false, message: 'Failed to get Quote', error: error.message });
+        // You can handle the error here or propagate it further.
+        throw error;
     }
 }
+
 const getEmployeeClients = async (req, res) => {
     try {
         const { id } = req.user; // Extract employee's id from req.user
