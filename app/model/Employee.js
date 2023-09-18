@@ -138,9 +138,10 @@ class Employee {
             JOIN client c ON q.client_id = c.id
             WHERE q.added_by_employee = ?
             ORDER BY quote_current_date DESC
-            
-            `;
-            const [quotes, fields] = await connection.query(selectQuery);
+        `;
+        
+        const [quotes, fields] = await connection.query(selectQuery, [employeeId]); // Replace 'employeeId' with the actual employee ID you want to query.
+        
 
             const QouteDetailsWithStatus = [];
 
