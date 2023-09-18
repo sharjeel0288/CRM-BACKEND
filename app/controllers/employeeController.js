@@ -96,40 +96,43 @@ const getDocumentsByDepartment = async (req, res) => {
     try {
         const { id, department } = req.user; // Extract employee's id and department from req.user
 
-        let documents = [];
-
         if (department === 'sales') {
-            documents = await Employee.getQuotesByEmployeeId(id);
+            const documents = await Employee.getQuotesByEmployeeId(id);
+            res.status(200).json({ success: true, documents });
         } else if (department === 'accounts') {
-            try {
-                const invoices = await Employee.getInvoicesByEmployeeId(id);
-                const InvoiceWithDetails = [];
-        
-                for (const invoice of invoices) {
-                    const InvoiceData = await Invoice.getInvoiceById(invoice.id);
-                    const InvoiceItemsData = await Invoice.getInvoiceItemsByInvoiceId(invoice.id);
-        
-                    InvoiceWithDetails.push({
-                        InvoiceData,
-                        InvoiceItemsData
-                    });
-                }
-        
-                res.status(200).json({ success: true, Invoice: InvoiceWithDetails });
-            } catch (error) {
-                console.error('Get all Invoice error:', error);
-                res.status(500).json({ success: false, message: 'Failed to get Invoice', error: error.message });
-            }
+            const invoicesWithDetails = await getInvoicesWithDetails(id);
+            res.status(200).json({ success: true, invoices: invoicesWithDetails });
         } else {
-            return res.status(400).json({ success: false, message: 'Invalid department' });
+            res.status(400).json({ success: false, message: 'Invalid department' });
         }
-
-        res.status(200).json({ success: true, documents });
     } catch (error) {
         console.error('Get documents by department error:', error);
         res.status(500).json({ success: false, message: 'Failed to get documents', error: error.message });
     }
 };
+
+async function getInvoicesWithDetails(employeeId) {
+    try {
+        const invoices = await Employee.getInvoicesByEmployeeId(employeeId);
+        const invoicesWithDetails = [];
+
+        for (const invoice of invoices) {
+            const invoiceId = invoice.id;
+            const InvoiceData = await Invoice.getInvoiceById(invoiceId);
+            const InvoiceItemsData = await Invoice.getInvoiceItemsByInvoiceId(invoiceId);
+
+            invoicesWithDetails.push({
+                InvoiceData,
+                InvoiceItemsData
+            });
+        }
+
+        return invoicesWithDetails;
+    } catch (error) {
+        throw error;
+    }
+}
+
 const getEmployeeClients = async (req, res) => {
     try {
         const { id } = req.user; // Extract employee's id from req.user
