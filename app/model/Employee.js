@@ -3,6 +3,7 @@ const connection = require('../../config/DbConfig');
 const jwtUtils = require('../utils/jwtUtils'); // Import the jwtUtils module
 const bcrypt = require('bcrypt');
 const Quote = require('./Quote');
+const Invoice = require('./Invoice');
 
 class Employee {
     static async getEmployeeByEmail(email) {
@@ -126,79 +127,123 @@ class Employee {
             throw new Error('Failed to fetch quotes for the provided employee ID.');
         }
     }
-
     static async getInvoicesByEmployeeId(employeeId) {
         try {
             const selectQuery = `
-                SELECT i.id AS invoice_id, i.client_id, i.isPerforma, i.number, i.invoice_current_date, i.status,
-                       i.expiry_date, i.terms_and_condition, i.payment_terms, i.execution_time, i.bank_details,
-                       ii.id AS item_id, ii.item_name, ii.item_description, ii.item_quantity, ii.item_xdim, 
-                       ii.item_ydim, ii.item_price, ii.item_subtotal, ii.item_tax, ii.item_total
-                FROM invoice i
-                JOIN invoice_item ii ON i.id = ii.invoice_id
-                WHERE i.added_by_employee = ?;
-            `;
-            const [invoicesAndItems, fields] = await connection.query(selectQuery, [employeeId]);
+            SELECT q.*, c.email AS client_email
+            FROM invoice q
+            JOIN client c ON q.client_id = c.id
+            WHERE q.added_by_employee = ?
+            ORDER BY invoice_current_date DESC
+          `;
+            const [invoices, fields] = await connection.query(selectQuery, [employeeId]);
 
-            const formattedData = [];
+            const invoicesWithPaymentStatus = [];
 
-            for (const row of invoicesAndItems) {
-                const existingInvoice = formattedData.find(item => item.invoice_id === row.invoice_id);
 
-                if (existingInvoice) {
-                    existingInvoice.items.push({
-                        item_id: row.item_id,
-                        item_name: row.item_name,
-                        item_description: row.item_description,
-                        item_quantity: row.item_quantity,
-                        item_xdim: row.item_xdim,
-                        item_ydim: row.item_ydim,
-                        item_price: row.item_price,
-                        item_subtotal: row.item_subtotal,
-                        item_tax: row.item_tax,
-                        item_total: row.item_total,
-                    });
+            for (const invoice of invoices) {
+                const invoiceId = invoice.id;
+                const invoicePayments = await Payment.getAllPaymentsByInvoiceId(invoiceId);
+                const invoiceItems = await Invoice.getInvoiceItemsByInvoiceId(invoiceId);
 
-                    // Update the total amount of the invoice
-                    existingInvoice.total_amount += row.item_total;
-                } else {
-                    formattedData.push({
-                        invoice_id: row.invoice_id,
-                        client_id: row.client_id,
-                        isPerforma: row.isPerforma,
-                        number: row.number,
-                        invoice_current_date: row.invoice_current_date,
-                        status: row.status,
-                        expiry_date: row.expiry_date,
-                        terms_and_condition: row.terms_and_condition,
-                        payment_terms: row.payment_terms,
-                        execution_time: row.execution_time,
-                        bank_details: row.bank_details,
-                        total_amount: row.item_total, // Initialize with the first item's total
-                        items: [
-                            {
-                                item_id: row.item_id,
-                                item_name: row.item_name,
-                                item_description: row.item_description,
-                                item_quantity: row.item_quantity,
-                                item_xdim: row.item_xdim,
-                                item_ydim: row.item_ydim,
-                                item_price: row.item_price,
-                                item_subtotal: row.item_subtotal,
-                                item_tax: row.item_tax,
-                                item_total: row.item_total,
-                            }
-                        ]
-                    });
-                }
+                const totalAmountPaid = invoicePayments.reduce((total, payment) => total + payment.amount, 0);
+
+                // Calculate total amount from InvoiceItemsData
+                const totalAmount = invoiceItems.reduce((total, item) => total + parseFloat(item.item_total), 0);
+                const paymentStatus = calculatePaymentStatus(totalAmount, totalAmountPaid);
+                // console.log('totalAmount', totalAmount)
+
+                const invoiceWithPaymentStatus = {
+                    ...invoice,
+                    payment_status: paymentStatus,
+                    total_amount_paid: totalAmountPaid,
+                    total_amount: totalAmount,
+                };
+
+                invoicesWithPaymentStatus.push(invoiceWithPaymentStatus);
             }
 
-            return formattedData;
+            return invoicesWithPaymentStatus;
         } catch (error) {
-            console.error('Get all invoices and items by employee ID error:', error);
-            throw new Error('Failed to fetch invoices and items for the provided employee ID.');
+            console.error('Get all invoices error:', error);
+            throw error;
         }
     }
+
+
+
+    // static async getInvoicesByEmployeeId(employeeId) {
+    //     try {
+    //         const selectQuery = `
+    //             SELECT i.id AS invoice_id, i.client_id, i.isPerforma, i.number, i.invoice_current_date, i.status,
+    //                    i.expiry_date, i.terms_and_condition, i.payment_terms, i.execution_time, i.bank_details,
+    //                    ii.id AS item_id, ii.item_name, ii.item_description, ii.item_quantity, ii.item_xdim, 
+    //                    ii.item_ydim, ii.item_price, ii.item_subtotal, ii.item_tax, ii.item_total
+    //             FROM invoice i
+    //             JOIN invoice_item ii ON i.id = ii.invoice_id
+    //             WHERE i.added_by_employee = ?;
+    //         `;
+    //         const [invoicesAndItems, fields] = await connection.query(selectQuery, [employeeId]);
+
+    //         const formattedData = [];
+
+    //         for (const row of invoicesAndItems) {
+    //             const existingInvoice = formattedData.find(item => item.invoice_id === row.invoice_id);
+
+    //             if (existingInvoice) {
+    //                 existingInvoice.items.push({
+    //                     item_id: row.item_id,
+    //                     item_name: row.item_name,
+    //                     item_description: row.item_description,
+    //                     item_quantity: row.item_quantity,
+    //                     item_xdim: row.item_xdim,
+    //                     item_ydim: row.item_ydim,
+    //                     item_price: row.item_price,
+    //                     item_subtotal: row.item_subtotal,
+    //                     item_tax: row.item_tax,
+    //                     item_total: row.item_total,
+    //                 });
+
+    //                 // Update the total amount of the invoice
+    //                 existingInvoice.total_amount += row.item_total;
+    //             } else {
+    //                 formattedData.push({
+    //                     invoice_id: row.invoice_id,
+    //                     client_id: row.client_id,
+    //                     isPerforma: row.isPerforma,
+    //                     number: row.number,
+    //                     invoice_current_date: row.invoice_current_date,
+    //                     status: row.status,
+    //                     expiry_date: row.expiry_date,
+    //                     terms_and_condition: row.terms_and_condition,
+    //                     payment_terms: row.payment_terms,
+    //                     execution_time: row.execution_time,
+    //                     bank_details: row.bank_details,
+    //                     total_amount: row.item_total, // Initialize with the first item's total
+    //                     items: [
+    //                         {
+    //                             item_id: row.item_id,
+    //                             item_name: row.item_name,
+    //                             item_description: row.item_description,
+    //                             item_quantity: row.item_quantity,
+    //                             item_xdim: row.item_xdim,
+    //                             item_ydim: row.item_ydim,
+    //                             item_price: row.item_price,
+    //                             item_subtotal: row.item_subtotal,
+    //                             item_tax: row.item_tax,
+    //                             item_total: row.item_total,
+    //                         }
+    //                     ]
+    //                 });
+    //             }
+    //         }
+
+    //         return formattedData;
+    //     } catch (error) {
+    //         console.error('Get all invoices and items by employee ID error:', error);
+    //         throw new Error('Failed to fetch invoices and items for the provided employee ID.');
+    //     }
+    // }
     static async getEmployeeById(employeeId) {
         try {
             const query = 'SELECT * FROM employee WHERE id = ?';
