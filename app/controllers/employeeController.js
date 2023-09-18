@@ -99,7 +99,7 @@ const getDocumentsByDepartment = async (req, res) => {
 
         if (department === 'sales') {
             const documents = await getQuotesWithDetails(id);
-            res.status(200).json({ success: true, documents });
+            res.status(200).json({ success: true, Quotee:documents });
         } else if (department === 'accounts') {
             const invoicesWithDetails = await getInvoicesWithDetails(id);
             res.status(200).json({ success: true, invoices: invoicesWithDetails });
