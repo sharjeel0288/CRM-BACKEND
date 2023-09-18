@@ -102,7 +102,7 @@ const getDocumentsByDepartment = async (req, res) => {
             documents = await Employee.getQuotesByEmployeeId(id);
         } else if (department === 'accounts') {
             try {
-                const invoices = awaitEmployee.getInvoicesByEmployeeId(id);
+                const invoices = await Employee.getInvoicesByEmployeeId(id);
                 const InvoiceWithDetails = [];
         
                 for (const invoice of invoices) {
