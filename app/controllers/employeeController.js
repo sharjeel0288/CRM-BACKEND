@@ -1,5 +1,6 @@
 const Employee = require('../model/Employee');
 const connection = require('../../config/DbConfig');
+const Invoice = require('../model/Invoice');
 
 
 // Get announcements by employee email
@@ -100,7 +101,25 @@ const getDocumentsByDepartment = async (req, res) => {
         if (department === 'sales') {
             documents = await Employee.getQuotesByEmployeeId(id);
         } else if (department === 'accounts') {
-            documents = await Employee.getInvoicesByEmployeeId(id);
+            try {
+                const invoices = awaitEmployee.getInvoicesByEmployeeId(id);
+                const InvoiceWithDetails = [];
+        
+                for (const invoice of invoices) {
+                    const InvoiceData = await Invoice.getInvoiceById(invoice.id);
+                    const InvoiceItemsData = await Invoice.getInvoiceItemsByInvoiceId(invoice.id);
+        
+                    InvoiceWithDetails.push({
+                        InvoiceData,
+                        InvoiceItemsData
+                    });
+                }
+        
+                res.status(200).json({ success: true, Invoice: InvoiceWithDetails });
+            } catch (error) {
+                console.error('Get all Invoice error:', error);
+                res.status(500).json({ success: false, message: 'Failed to get Invoice', error: error.message });
+            }
         } else {
             return res.status(400).json({ success: false, message: 'Invalid department' });
         }
