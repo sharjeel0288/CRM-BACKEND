@@ -4,6 +4,7 @@ const jwtUtils = require('../utils/jwtUtils'); // Import the jwtUtils module
 const bcrypt = require('bcrypt');
 const Quote = require('./Quote');
 const Invoice = require('./Invoice');
+const Payment = require('./Payment');
 
 class Employee {
     static async getEmployeeByEmail(email) {
