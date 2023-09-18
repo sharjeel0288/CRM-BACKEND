@@ -1,6 +1,7 @@
 const Employee = require('../model/Employee');
 const connection = require('../../config/DbConfig');
 const Invoice = require('../model/Invoice');
+const Quote = require('../model/Quote');
 
 
 // Get announcements by employee email
@@ -97,7 +98,7 @@ const getDocumentsByDepartment = async (req, res) => {
         const { id, department } = req.user; // Extract employee's id and department from req.user
 
         if (department === 'sales') {
-            const documents = await Employee.getQuotesByEmployeeId(id);
+            const documents = await getQuotesWithDetails(id);
             res.status(200).json({ success: true, documents });
         } else if (department === 'accounts') {
             const invoicesWithDetails = await getInvoicesWithDetails(id);
@@ -132,7 +133,27 @@ async function getInvoicesWithDetails(employeeId) {
         throw error;
     }
 }
+async function getQuotesWithDetails(employeeId) {
+    try {
+        const quotes = await Employee.getQuotesByEmployeeId(employeeId);
+        const QuotesWithDetails = [];
 
+        for (const quote of quotes) {
+            const quotesData = await Quote.getQuoteById(quote.id);
+            const quotesItemsData = await Quote.getQuoteItemsByQuoteId(quote.id);
+
+            QuotesWithDetails.push({
+                quotesData,
+                quotesItemsData
+            });
+        }
+
+        res.status(200).json({ success: true, Quote: QuotesWithDetails });
+    } catch (error) {
+        console.error('Get all Quote error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get Quote', error: error.message });
+    }
+}
 const getEmployeeClients = async (req, res) => {
     try {
         const { id } = req.user; // Extract employee's id from req.user
