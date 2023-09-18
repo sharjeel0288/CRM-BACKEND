@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const Quote = require('./Quote');
 const Invoice = require('./Invoice');
 const Payment = require('./Payment');
+const { calculatePaymentStatus } = require('../utils/helpingFunctions');
 
 class Employee {
     static async getEmployeeByEmail(email) {
