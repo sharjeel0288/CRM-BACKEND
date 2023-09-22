@@ -37,8 +37,9 @@ class Invoice {
 
 
             // Generate a unique invoice number
-            const uniqueInvoiceNumber = generateUniqueInvoiceNumber();
-
+            let uniqueInvoiceNumber
+            if (invoiceData.is_LPO == 0) { uniqueInvoiceNumber = generateUniqueInvoiceNumber(); }
+            else if (invoiceData.is_LPO === 1) { uniqueInvoiceNumber = generateUniqueLPONumber(); }
             // Insert invoice data
             const insertInvoiceQuery = 'INSERT INTO invoice SET ?';
             const invoiceDataToInsert = {
@@ -156,8 +157,8 @@ class Invoice {
             let addedByInfo = {
                 employee_name: '',
                 employee_surname: '',
-                employee_phone:'',
-                employee_email:''
+                employee_phone: '',
+                employee_email: ''
 
             };
 
@@ -207,7 +208,7 @@ class Invoice {
                 employee_name: addedByInfo.employee_name,
                 employee_surname: addedByInfo.employee_surname,
                 employee_email: addedByInfo.email,
-                employee_phone:addedByInfo.employee_phone
+                employee_phone: addedByInfo.employee_phone
             };
 
             return invoiceWithPaymentStatus;
@@ -313,11 +314,24 @@ class Invoice {
 
 
 function generateUniqueInvoiceNumber() {
-    // Implement your logic here to generate a unique invoice number
-    // For example: use a combination of date and a random number
-    const uniqueNumber = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    const constantPrefix = "FSGR-INVOICE";
+    const uniqueSerialNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    const currentYear = new Date().getFullYear().toString().slice(-2);
+
+    const uniqueNumber = `${constantPrefix}-${uniqueSerialNumber}-${currentYear}`;
+
     return uniqueNumber;
 }
+function generateUniqueLPONumber() {
+    const constantPrefix = "FSGR-LPO";
+    const uniqueSerialNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    const currentYear = new Date().getFullYear().toString().slice(-2);
+
+    const uniqueNumber = `${constantPrefix}-${uniqueSerialNumber}-${currentYear}`;
+
+    return uniqueNumber;
+}
+
 
 
 module.exports = Invoice;

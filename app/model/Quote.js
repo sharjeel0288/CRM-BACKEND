@@ -390,7 +390,7 @@ class Quote {
                 is_approved_by_admin: isApproved,
                 note: updatedQuoteData.note || existingQuoteData.note,
                 discount: updatedQuoteData.discount || existingQuoteData.discount,
-                is_converted_to_invoice:updatedQuoteData.is_converted_to_invoice || existingQuoteData.is_converted_to_invoice,
+                is_converted_to_invoice: updatedQuoteData.is_converted_to_invoice || existingQuoteData.is_converted_to_invoice,
                 // payment_mode_id: updatedQuoteData.paymentModeId || existingQuoteData.payment_mode_id
             };
             // console.log(newQuoteData.is_approved_by_admin)
@@ -447,11 +447,15 @@ class Quote {
 
 
 function generateUniqueQuoteNumber() {
-    // Implement your logic here to generate a unique quote number
-    // For example: use a combination of date and a random number
-    const uniqueNumber = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    const constantPrefix = "FSGR-QUOTE";
+    const uniqueSerialNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    const currentYear = new Date().getFullYear().toString().slice(-2);
+
+    const uniqueNumber = `${constantPrefix}-${uniqueSerialNumber}-${currentYear}`;
+
     return uniqueNumber;
 }
+
 
 
 module.exports = Quote;
