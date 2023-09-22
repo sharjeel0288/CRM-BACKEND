@@ -52,7 +52,7 @@ const employeeSchema = Joi.object({
   department: Joi.string().required(),
   position: Joi.string().required(),
   phone: Joi.string()
-    .pattern(/^\d{11}$/) // Matches exactly 11 digits
+    .pattern(/^\d{10}$/) // Matches exactly 10 digits
     .required(),
   email: Joi.string().email().required(),
   password: Joi.string().required(),
