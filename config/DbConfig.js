@@ -2,11 +2,11 @@ const mysql = require('mysql2/promise'); // Import promise-based mysql2 library
 
 // Database configuration
 const dbConfig = {
-  host: "localhost",
-  user: "root",
-  password: "1234",
-  database: "crm",
-  port: "3308",
+  host: "auth-db1089.hstgr.io",
+  user: "u500952380_root",
+  password: "Seasame007",
+  database: "u500952380_crm",
+  port: "3306",
 };
 
 

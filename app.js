@@ -1,10 +1,7 @@
-// app.js
-
 const express = require('express');
 const cors = require('cors');
 const clientRoutes = require('./app/routes/clientRoutes');
 const errorHandler = require('./app/middleware/errorHandler');
-const connection = require('./config/DbConfig'); // Import the database connection
 const paymentModeRoute = require('./app/routes/paymentModeRoutes');
 const adminRoutes = require('./app/routes/adminRoutes');
 const authRoutes = require('./app/routes/authRoutes');
@@ -14,14 +11,20 @@ const employeeRoutes = require('./app/routes/employeeRoutes');
 const settingRoutes = require('./app/routes/SettingRoutes');
 const bodyParser = require('body-parser');
 const reportRoutes = require('./app/routes/reportRoutes');
-const sendPdf = require('./app/routes/pdfEmail')
+const sendPdf = require('./app/routes/pdfEmail');
 const path = require('path');
-
-const app = express();
+const fs = require('fs');
+const https = require('https');
 const port = 3000;
 
+const app = express();
 const corsOptions = {
-  origin: 'http://localhost:3001', // Change this to the correct origin of your frontend
+  origin: [
+    'https://crm.fourseasonglassrooms.com',
+    'https://test.fourseasonglassrooms.com',
+    'http://localhost:3001',
+    'http://localhost:3000'
+  ],
   credentials: true,
 };
 
@@ -42,26 +45,36 @@ app.use('/api', quoteRoutes);
 app.use('/api', invoiceRoutes);
 app.use('/api', paymentModeRoute);
 app.use('/api', employeeRoutes);
-app.use('/api', settingRoutes)
-app.use('/api', sendPdf)
+app.use('/api', settingRoutes);
+app.use('/api', sendPdf);
 
 // Schedule the function to run on the 1st day of each month
-const { assignLostQuotesToSalesEmployees } = require('./app/scheduler/lostQuote'); // Import the function
+const { assignLostQuotesToSalesEmployees } = require('./app/scheduler/lostQuote');
 const schedule = require('node-schedule');
 const monthlySchedule = '0 0 1 * *';
-// const minuteSchedule = '* * * * *'; // Run every minute
 schedule.scheduleJob(monthlySchedule, () => {
   assignLostQuotesToSalesEmployees();
   console.log('Scheduled task executed at:', new Date());
 });
-// assignLostQuotesToSalesEmployees()
 
 // Error handler
 app.use(errorHandler);
 
+// Catch-all route for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
 
+// HTTPS (SSL/TLS) Configuration
+const httpsOptions = {
+  key: fs.readFileSync('/etc/letsencrypt/live/backend.fourseasonglassrooms.com/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/backend.fourseasonglassrooms.com/fullchain.pem')
+};
+
+// Create an HTTPS server
+const server = https.createServer(httpsOptions, app);
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+server.listen(port, () => {
+  console.log(`Server is running on HTTPS at port ${port}`);
 });
