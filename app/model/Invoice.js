@@ -10,8 +10,8 @@ class Invoice {
     static async createInvoice(invoiceData, invoiceItemsData) {
         console.log('invoice')
         console.log(invoiceData)
-        console.log('invoiceItem')
-        console.log(invoiceItemsData)
+        // console.log('invoiceItem')
+        // console.log(invoiceItemsData)
         try {
             const clientEmail = invoiceData.client_email;
             const addedByEmployeeEmail = invoiceData.employee_email;
@@ -59,6 +59,7 @@ class Invoice {
                 is_LPO: invoiceData.is_LPO,
                 pname: invoiceData.pname,
                 location: invoiceData.location,
+                note: invoiceData.note
                 // payment_mode_id: invoiceData.paymentModeId,
 
             };
@@ -78,7 +79,8 @@ class Invoice {
                     item_price: invoiceItemData.item_price,
                     item_subtotal: invoiceItemData.item_subtotal,
                     item_tax: invoiceItemData.item_tax,
-                    item_total: invoiceItemData.item_total
+                    item_total: invoiceItemData.item_total,
+                    item_unit: invoiceData.item_unit
                 };
                 await connection.query(insertInvoiceItemQuery, invoiceItemDataToInsert);
             }
@@ -146,7 +148,7 @@ class Invoice {
                 WHERE q.id = ?;
             `;
             const [invoices, fields] = await connection.query(selectQuery, [invoiceId]);
-            console.log(invoices)
+            // console.log(invoices)
             if (invoices.length === 0) {
                 throw new Error('Invoice not found');
             }
@@ -278,8 +280,8 @@ class Invoice {
                 note: updatedInvoiceData.note || existingInvoiceData.note,
                 discount: updatedInvoiceData.discount || existingInvoiceData.discount,
                 is_LPO: existingInvoiceData.is_LPO,
-                pname: existingInvoiceData.pname || updatedInvoiceData.pname,
-                location: existingInvoiceData.location || updatedInvoiceData.location,
+                pname: updatedInvoiceData.pname || existingInvoiceData.pname,
+                location: updatedInvoiceData.location || existingInvoiceData.location,
 
             };
             // Convert the provided expiry_date string to a JavaScript Date object
