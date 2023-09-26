@@ -2,7 +2,6 @@
 const connection = require('../../config/DbConfig');
 const Payment = require('../model/Payment')
 const { calculatePaymentStatus } = require('../utils/helpingFunctions');
-const { updateQuoteData } = require('./Quote');
 const Employee = require('./Employee')
 const Client = require('./Client')
 
