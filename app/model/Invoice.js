@@ -10,8 +10,8 @@ class Invoice {
     static async createInvoice(invoiceData, invoiceItemsData) {
         console.log('invoice')
         console.log(invoiceData)
-        // console.log('invoiceItem')
-        // console.log(invoiceItemsData)
+        console.log('invoiceItem')
+        console.log(invoiceItemsData)
         try {
             const clientEmail = invoiceData.client_email;
             const addedByEmployeeEmail = invoiceData.employee_email;
@@ -80,7 +80,7 @@ class Invoice {
                     item_subtotal: invoiceItemData.item_subtotal,
                     item_tax: invoiceItemData.item_tax,
                     item_total: invoiceItemData.item_total,
-                    item_unit: invoiceData.item_unit
+                    item_unit: invoiceItemData.item_unit
                 };
                 await connection.query(insertInvoiceItemQuery, invoiceItemDataToInsert);
             }
