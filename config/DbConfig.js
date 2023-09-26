@@ -94,6 +94,7 @@ const pool = mysql.createPool({
         item_subtotal FLOAT,
         item_tax FLOAT,
         item_total FLOAT,
+        item_unit VARCHAR(255),
         FOREIGN KEY (invoice_id) REFERENCES invoice(id) ON DELETE CASCADE
       );
       
@@ -140,6 +141,7 @@ const pool = mysql.createPool({
         item_subtotal FLOAT,
         item_tax FLOAT,
         item_total FLOAT,
+        item_unit VARCHAR(255),
         FOREIGN KEY (quote_id) REFERENCES quote(id) ON DELETE CASCADE
       );
       

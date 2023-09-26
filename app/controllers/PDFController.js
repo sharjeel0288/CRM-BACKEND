@@ -123,6 +123,7 @@ const GetInvoicePdfDetails = async (req, res) => {
             subtotal += item.item_total
         }
         const vatRate = 0.05; // 5% VAT rate
+        console.log("taxxxxxxxxxxxxxxxxxxxxxxxx", invoiceData.discount)
         const tax = subtotal -invoiceData.discount * vatRate;
         const total = subtotal + tax;
         // Placeholder response indicating success

@@ -120,6 +120,11 @@ const quoteItemValidationSchema = Joi.object({
     'number.base': 'Invalid item total',
     'any.required': 'Item total is required',
   }),
+  item_unit: Joi.string().trim().required().messages({
+    'any.required': 'Item unit is required',
+    'string.empty': 'Item unit cannot be empty',
+  }),
+
 });
 
 const validateQuoteItem = (req, res, next) => {
@@ -251,6 +256,7 @@ const invoiceSchema = Joi.object({
     item_subtotal: Joi.number().required(),
     item_tax: Joi.number().required(),
     item_total: Joi.number().required(),
+    item_unit: Joi.string().required(),
   })).min(1).required(),
 });
 
@@ -305,6 +311,11 @@ const invoiceItemSchema = Joi.object({
     'any.required': 'Item total is required',
     'number.base': 'Item total must be a number',
   }),
+  item_unit: Joi.string().trim().required().messages({
+    'any.required': 'Item unit is required',
+    'string.empty': 'Item unit cannot be empty',
+  }),
+
 });
 const validateInvoiceItem = (req, res, next) => {
   const { error } = invoiceItemSchema.validate(req.body);
