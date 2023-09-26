@@ -76,7 +76,7 @@ class Quote {
                     item_subtotal: quoteItemData.item_subtotal,
                     item_tax: quoteItemData.item_tax,
                     item_total: quoteItemData.item_total,
-                    item_unit:quoteItemData.item_unit,
+                    item_unit: quoteItemData.item_unit,
                 };
                 await connection.query(insertQuoteItemQuery, quoteItemDataToInsert);
             }

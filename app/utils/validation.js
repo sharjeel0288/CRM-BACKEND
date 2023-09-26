@@ -128,81 +128,79 @@ const quoteItemValidationSchema = Joi.object({
 });
 
 const validateQuoteItem = (req, res, next) => {
-  const { error } = quoteItemValidationSchema.validate(req.body, { abortEarly: false });
+  const { error } = quoteItemValidationSchema.validate(req.body);
   if (error) {
-    const errors = error.details.map(detail => detail.message);
-    return res.status(400).json({ success: false, errors });
+    return res.status(400).json({ error: error.details[0].message });
   }
   next();
 };
 
 
 const quoteValidationSchema = Joi.object({
-  client_email: Joi.string().email().required().messages({
-    'string.email': 'Invalid client email',
-    'any.required': 'Client email is required',
+  quoteData:Joi.object({
+
+
+    client_email: Joi.string().email().required().messages({
+      'string.email': 'Invalid client email',
+      'any.required': 'Client email is required',
+    }),
+    status: Joi.number().integer().min(1).max(7).required().messages({
+      'number.base': 'Invalid status value',
+      'number.min': 'Invalid status value',
+      'number.max': 'Invalid status value',
+      'any.required': 'Status is required',
+    }),
+    employee_email: Joi.string().email().required().messages({
+      'string.email': 'Invalid employee email',
+      'any.required': 'Employee email is required',
+    }),
+    expiry_date: Joi.date().required().messages({
+      'date.base': 'Invalid expiry date',
+      'any.required': 'Expiry date is required',
+    }),
+    terms_and_condition: Joi.string().required().messages({
+      'any.required': 'Terms and conditions are required',
+    }),
+    note: Joi.string().required().messages({
+      'any.required': 'note are required',
+    }),
+    payment_terms: Joi.string().required().messages({
+      'any.required': 'Payment terms are required',
+    }),
+    execution_time: Joi.string().required().messages({
+      'any.required': 'Execution time is required',
+    }),
+    bank_details: Joi.string().required().messages({
+      'any.required': 'Bank details are required',
+    }),
+    discount: Joi.number().integer().min(0).required().messages({
+      'number.base': 'Discount must be a number',
+      'number.integer': 'Discount must be an integer',
+      'number.min': 'Discount must be 0 or a positive integer',
+      'any.required': 'Discount is required',
+    }),
   }),
-  status: Joi.number().integer().min(1).max(7).required().messages({
-    'number.base': 'Invalid status value',
-    'number.min': 'Invalid status value',
-    'number.max': 'Invalid status value',
-    'any.required': 'Status is required',
-  }),
-  employee_email: Joi.string().email().required().messages({
-    'string.email': 'Invalid employee email',
-    'any.required': 'Employee email is required',
-  }),
-  expiry_date: Joi.date().required().messages({
-    'date.base': 'Invalid expiry date',
-    'any.required': 'Expiry date is required',
-  }),
-  terms_and_condition: Joi.string().required().messages({
-    'any.required': 'Terms and conditions are required',
-  }),
-  note: Joi.string().required().messages({
-    'any.required': 'note are required',
-  }),
-  payment_terms: Joi.string().required().messages({
-    'any.required': 'Payment terms are required',
-  }),
-  execution_time: Joi.string().required().messages({
-    'any.required': 'Execution time is required',
-  }),
-  bank_details: Joi.string().required().messages({
-    'any.required': 'Bank details are required',
-  }),
-  discount: Joi.number().integer().min(0).required().messages({
-    'number.base': 'Discount must be a number',
-    'number.integer': 'Discount must be an integer',
-    'number.min': 'Discount must be 0 or a positive integer',
-    'any.required': 'Discount is required',
-  }),
-  quoteItemsData: Joi.array().items(
-    Joi.object({
-      item_name: Joi.string().required().messages({
-        'any.required': 'Item name is required',
-      }),
-      // Add more validation rules for quote items fields
-    })
-  ),
+  quoteItemsData: Joi.array().items(Joi.object({
+    item_name: Joi.string().required(),
+    item_description: Joi.string().required(),
+    item_quantity: Joi.number().integer().min(1).required(),
+    item_xdim: Joi.number().required(),
+    item_ydim: Joi.number().required(),
+    item_price: Joi.number().required(),
+    item_subtotal: Joi.number().required(),
+    item_tax: Joi.number().required(),
+    item_total: Joi.number().required(),
+    item_unit: Joi.string().required(),
+  })).min(1).required(),
 
 });
 
 const validateQuote = (req, res, next) => {
-  const { error: quoteError } = quoteValidationSchema.validate(req.body.quoteData, { abortEarly: false });
-  if (quoteError) {
-    const quoteErrors = quoteError.details.map(detail => detail.message);
-    return res.status(400).json({ success: false, errors: quoteErrors });
-  }
+  console.log(req.body)
+  const { error } = quoteValidationSchema.validate(req.body);
+  if (error) {
 
-  // Validate quote items data
-  const { error: itemsError } = Joi.array().min(1).items(
-    quoteItemValidationSchema
-  ).validate(req.body.quoteItemsData, { abortEarly: false });
-
-  if (itemsError) {
-    const itemsErrors = itemsError.details.map(detail => detail.message);
-    return res.status(400).json({ success: false, errors: itemsErrors });
+    return res.status(400).json({ error: error.details[0].message });
   }
 
   next();
