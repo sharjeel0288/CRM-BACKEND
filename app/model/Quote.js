@@ -88,6 +88,7 @@ class Quote {
             throw error;
         }
     }
+
     static async getAllQuotes() {
         try {
             const selectQuery = `
@@ -121,6 +122,7 @@ class Quote {
         }
     }
     static async getAllAssignedQuotes(EmployeeId) {
+        console.log('assign quote k andr emp ki id : ', EmployeeId)
         try {
             const lostQuoteQuery = `SELECT * FROM lost_quote WHERE assigned_to_employee = ? AND isDone = 0`;
             const [lostQuotes, _] = await connection.query(lostQuoteQuery, [EmployeeId]);
@@ -153,7 +155,7 @@ class Quote {
                     QouteDetailsWithStatus.push(QuoteDetails);
                 }
             }
-
+            console.log('return ye horha h check k liyen : ', QouteDetailsWithStatus)
             return QouteDetailsWithStatus;
         } catch (error) {
             console.error('Get all assigned quotes error:', error);
@@ -483,7 +485,15 @@ class Quote {
             throw { success: false, message: 'Failed to update approval status by client', error: error.message };
         }
     }
-
+    static async updateAssignedQuoteStatus(quoteId, message, isDone) {
+        try {
+            const updateQuery = 'UPDATE quote SET message = ?, isDone = ? WHERE id = ?';
+            const [result] = await connection.query(updateQuery, [message, isDone, quoteId]);
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 

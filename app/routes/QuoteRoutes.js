@@ -22,6 +22,9 @@ router.patch('/quote/:quoteId/approvedByClient', quoteController.updateApprovedB
 router.post('/quote/convertQuoteToInvoice', quoteController.convertQuoteToInvoice);
 router.post('/quote/convertQuoteToInvoice', quoteController.convertQuoteToInvoice);
 
+router.patch('/quote/updateAssignedStatus/:quoteId', quoteController.updateAssignedQuoteStatus);
+
+
 router.use(quoteItemRoutes);
 
 module.exports = router;

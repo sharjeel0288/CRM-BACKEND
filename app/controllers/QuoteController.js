@@ -51,12 +51,23 @@ const getAllQuotes = async (req, res) => {
 const getAllAssignedQuotes = async (req, res) => {
     try {
         const EmployeeId = req.params.employeeId; // Assuming the employeeId is in the request parameters
-        const assignedQuotes = await Quote.getAllAssignedQuotes(EmployeeId);
+        const quotes = await Quote.getAllAssignedQuotes(EmployeeId);
+        const QuotesWithDetails = [];
 
-        res.status(200).json({ success: true, assignedQuotes });
+        for (const quote of quotes) {
+            const quotesData = await Quote.getQuoteById(quote.id);
+            const quotesItemsData = await Quote.getQuoteItemsByQuoteId(quote.id);
+
+            QuotesWithDetails.push({
+                quotesData,
+                quotesItemsData
+            });
+        }
+
+        res.status(200).json({ success: true, Quote: QuotesWithDetails });
     } catch (error) {
-        console.error('Get all assigned quotes error:', error);
-        res.status(500).json({ success: false, message: 'Failed to get assigned quotes', error: error.message });
+        console.error('Get all Assigned Quote for employee error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get all Assigned Quote for employee', error: error.message });
     }
 };
 const getAllApprovedByClientQuotes = async (req, res) => {
@@ -235,7 +246,22 @@ async function convertQuoteToInvoice(req, res) {
         res.status(500).json({ success: false, message: 'Failed to convert quote to invoice', error: error.message });
     }
 };
+const updateAssignedQuoteStatus = async (req, res) => {
+    const { quoteId } = req.params;
+    const { message, isDone } = req.body;
 
+    try {
+        const result = await Quote.updateAssignedQuoteStatus(quoteId, message, isDone);
+        if (result.affectedRows > 0) {
+            res.status(200).json({ success: true, message: 'Quote status updated successfully' });
+        } else {
+            res.status(404).json({ success: false, message: 'Quote not found' });
+        }
+    } catch (error) {
+        console.error('Update assigned quote status error:', error);
+        res.status(500).json({ success: false, message: 'Failed to update quote status', error: error.message });
+    }
+};
 module.exports = {
     createQuote,
     getAllQuotes,
@@ -248,4 +274,5 @@ module.exports = {
     convertQuoteToInvoice,
     getAllApprovedByClientQuotes,
     getAllAssignedQuotes,
+    updateAssignedQuoteStatus,
 };
