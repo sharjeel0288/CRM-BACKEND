@@ -48,6 +48,17 @@ const getAllQuotes = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to get Quote', error: error.message });
     }
 };
+const getAllAssignedQuotes = async (req, res) => {
+    try {
+        const EmployeeId = req.params.employeeId; // Assuming the employeeId is in the request parameters
+        const assignedQuotes = await Quote.getAllAssignedQuotes(EmployeeId);
+
+        res.status(200).json({ success: true, assignedQuotes });
+    } catch (error) {
+        console.error('Get all assigned quotes error:', error);
+        res.status(500).json({ success: false, message: 'Failed to get assigned quotes', error: error.message });
+    }
+};
 const getAllApprovedByClientQuotes = async (req, res) => {
     try {
         const quotes = await Quote.getAllApprovedByClientQuotes();
@@ -236,4 +247,5 @@ module.exports = {
     updateApprovedByClient,
     convertQuoteToInvoice,
     getAllApprovedByClientQuotes,
+    getAllAssignedQuotes,
 };

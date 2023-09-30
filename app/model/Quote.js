@@ -120,6 +120,47 @@ class Quote {
             throw error;
         }
     }
+    static async getAllAssignedQuotes(EmployeeId) {
+        try {
+            const lostQuoteQuery = `SELECT * FROM lost_quote WHERE assigned_to_employee = ? AND isDone = 0`;
+            const [lostQuotes, _] = await connection.query(lostQuoteQuery, [EmployeeId]);
+
+            const QouteDetailsWithStatus = [];
+
+            for (const lostQuote of lostQuotes) {
+                const selectQuoteQuery = `
+                    SELECT q.*, c.email AS client_email
+                    FROM quote q
+                    JOIN client c ON q.client_id = c.id
+                    WHERE q.id = ? 
+                    ORDER BY quote_current_date DESC
+                `;
+
+                const [quotes, fields] = await connection.query(selectQuoteQuery, [lostQuote.quote_id]);
+
+                for (const quote of quotes) {
+                    const quoteId = quote.id;
+                    const quoteItems = await Quote.getQuoteItemsByQuoteId(quoteId);
+
+                    const totalAmount = quoteItems.reduce((total, item) => total + parseFloat(item.item_total), 0);
+
+                    const QuoteDetails = {
+                        ...quote,
+                        total_amount: totalAmount,
+                        quoteItems: quoteItems
+                    };
+
+                    QouteDetailsWithStatus.push(QuoteDetails);
+                }
+            }
+
+            return QouteDetailsWithStatus;
+        } catch (error) {
+            console.error('Get all assigned quotes error:', error);
+            throw error;
+        }
+    }
+
     static async getAllApprovedByClientQuotes() {
         try {
             const selectQuery = `
